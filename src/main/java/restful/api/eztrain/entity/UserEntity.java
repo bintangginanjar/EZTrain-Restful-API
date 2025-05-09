@@ -51,6 +51,8 @@ public class UserEntity {
 
     private boolean isVerified;
 
+    private boolean isActive;
+
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
     private Date createdAt;

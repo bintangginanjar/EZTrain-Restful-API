@@ -36,6 +36,9 @@ public class VoucherEntity {
     @Column(nullable = false)
     private Double discountAmount;
 
+    @Column(nullable = false)
+    private Double minimumAmount;
+
     private LocalDateTime validFrom;
     private LocalDateTime validUntil;
 
