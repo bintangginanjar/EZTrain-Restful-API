@@ -1,6 +1,7 @@
 package restful.api.eztrain.service;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import lombok.extern.slf4j.Slf4j;
 import restful.api.eztrain.entity.RoleEntity;
 import restful.api.eztrain.entity.UserEntity;
 import restful.api.eztrain.mapper.ResponseMapper;
@@ -22,7 +22,6 @@ import restful.api.eztrain.repository.RoleRepository;
 import restful.api.eztrain.repository.UserRepository;
 
 @Service
-@Slf4j
 public class UserService {
 
     @Autowired
@@ -69,9 +68,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserResponse get(Authentication authentication) {
-
-        log.info("CURRENT NAME {}", authentication.getName());
+    public UserResponse get(Authentication authentication) {        
 
         UserEntity user = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));                    
 
@@ -108,6 +105,13 @@ public class UserService {
         userRepository.save(user);        
 
         return ResponseMapper.ToUserResponseMapper(user);
+    }
 
+    @Transactional(readOnly = true)
+    public List<UserResponse> list() {   
+
+        List<UserEntity> users = userRepository.findAll();
+
+        return ResponseMapper.ToUserResponseListMapper(users);
     }
 }

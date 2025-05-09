@@ -71,7 +71,9 @@ public class AuthControllerTest {
         UserEntity user = new UserEntity();
         user.setEmail(email);        
         user.setPassword(passwordEncoder.encode(password));
-        user.setRoles(Collections.singletonList(role));        
+        user.setRoles(Collections.singletonList(role));
+        user.setIsVerified(true);
+        user.setIsActive(true);        
         userRepository.save(user);
 
     }

@@ -23,6 +23,6 @@ public class UserResponse {
 
     private boolean isActive;
 
-    private List<String> role;
+    private List<String> role;    
         
 }

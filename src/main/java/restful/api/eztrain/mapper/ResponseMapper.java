@@ -19,8 +19,22 @@ public class ResponseMapper {
                 .fullName(user.getFullName())
                 .phoneNumber(user.getPhoneNumber())   
                 .isVerified(user.getIsVerified())
+                .isActive(user.getIsActive())
                 .role(roles)
                 .build();
+    }
+
+    public static List<UserResponse> ToUserResponseListMapper(List<UserEntity> users) {
+        return users.stream()
+                            .map(
+                                p -> new UserResponse(
+                                    p.getEmail(),
+                                    p.getFullName(),
+                                    p.getPhoneNumber(),   
+                                    p.getIsVerified(),
+                                    p.getIsActive(),
+                                    p.getRoles().stream().map(s -> s.getName()).toList()
+                                )).collect(Collectors.toList());
     }
 
     public static TokenResponse ToTokenResponseMapper(UserEntity user, String token, List<String> roles) {
