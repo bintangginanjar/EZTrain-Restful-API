@@ -145,7 +145,9 @@ public class UserControllerTest {
         UserEntity user = new UserEntity();
         user.setEmail(email);      
         user.setPassword(passwordEncoder.encode(password));
-        user.setRoles(Collections.singletonList(role));          
+        user.setRoles(Collections.singletonList(role));
+        user.setIsVerified(true);
+        user.setIsActive(true);
         userRepository.save(user);
 
         RegisterUserRequest request = new RegisterUserRequest();
@@ -175,7 +177,9 @@ public class UserControllerTest {
         UserEntity user = new UserEntity();
         user.setEmail(email);      
         user.setPassword(passwordEncoder.encode(password));
-        user.setRoles(Collections.singletonList(role));          
+        user.setRoles(Collections.singletonList(role));
+        user.setIsVerified(true);
+        user.setIsActive(true);
         userRepository.save(user);
         
         Authentication authentication = authenticationManager.authenticate(
@@ -214,7 +218,9 @@ public class UserControllerTest {
         UserEntity user = new UserEntity();
         user.setEmail(email);      
         user.setPassword(passwordEncoder.encode(password));
-        user.setRoles(Collections.singletonList(role));          
+        user.setRoles(Collections.singletonList(role));
+        user.setIsVerified(true);
+        user.setIsActive(true);
         userRepository.save(user);
                 
         Authentication authentication = authenticationManager.authenticate(
@@ -252,7 +258,9 @@ public class UserControllerTest {
         UserEntity user = new UserEntity();
         user.setEmail(email);      
         user.setPassword(passwordEncoder.encode(password));
-        user.setRoles(Collections.singletonList(role));          
+        user.setRoles(Collections.singletonList(role));
+        user.setIsVerified(true);
+        user.setIsActive(true);
         userRepository.save(user);
                 
         Authentication authentication = authenticationManager.authenticate(
@@ -290,7 +298,9 @@ public class UserControllerTest {
         UserEntity user = new UserEntity();
         user.setEmail(email);      
         user.setPassword(passwordEncoder.encode(password));
-        user.setRoles(Collections.singletonList(role));          
+        user.setRoles(Collections.singletonList(role));
+        user.setIsVerified(true);
+        user.setIsActive(true);
         userRepository.save(user);
                 
         Authentication authentication = authenticationManager.authenticate(
@@ -324,7 +334,9 @@ public class UserControllerTest {
         UserEntity user = new UserEntity();
         user.setEmail(email);      
         user.setPassword(passwordEncoder.encode(password));
-        user.setRoles(Collections.singletonList(role));          
+        user.setRoles(Collections.singletonList(role));
+        user.setIsVerified(true);
+        user.setIsActive(true);
         userRepository.save(user);
                 
         Authentication authentication = authenticationManager.authenticate(
@@ -357,7 +369,9 @@ public class UserControllerTest {
         UserEntity user = new UserEntity();
         user.setEmail(email);      
         user.setPassword(passwordEncoder.encode(password));
-        user.setRoles(Collections.singletonList(role));          
+        user.setRoles(Collections.singletonList(role));
+        user.setIsVerified(false);
+        user.setIsActive(false);
         userRepository.save(user);
         
         Authentication authentication = authenticationManager.authenticate(
@@ -377,8 +391,8 @@ public class UserControllerTest {
         request.setPassword("123456");
         request.setFullName("Bintang Ginanjar");
         request.setPhoneNumber("11111111");
-        request.setVerified(true);
-        request.setActive(true);
+        request.setIsVerified(true);
+        request.setIsActive(true);
 
         mockMvc.perform(
                 patch("/api/users")
@@ -401,9 +415,11 @@ public class UserControllerTest {
         RoleEntity role = roleRepository.findByName("ROLE_ADMIN").orElse(null);
 
         UserEntity user = new UserEntity();
-        user.setEmail(email);
+        user.setEmail(email);      
         user.setPassword(passwordEncoder.encode(password));
-        user.setRoles(Collections.singletonList(role));        
+        user.setRoles(Collections.singletonList(role));
+        user.setIsVerified(true);
+        user.setIsActive(true);
         userRepository.save(user);
         
         Authentication authentication = authenticationManager.authenticate(
@@ -443,11 +459,12 @@ public class UserControllerTest {
         RoleEntity role = roleRepository.findByName("ROLE_USER").orElse(null);
 
         UserEntity user = new UserEntity();
-        user.setEmail(email);
+        user.setEmail(email);      
         user.setPassword(passwordEncoder.encode(password));
-        user.setRoles(Collections.singletonList(role));        
+        user.setRoles(Collections.singletonList(role));
+        user.setIsVerified(true);
+        user.setIsActive(true);
         userRepository.save(user);
-        
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
                                                 email, password)
@@ -481,9 +498,11 @@ public class UserControllerTest {
         RoleEntity role = roleRepository.findByName("ROLE_USER").orElse(null);
 
         UserEntity user = new UserEntity();
-        user.setEmail(email);
+        user.setEmail(email);      
         user.setPassword(passwordEncoder.encode(password));
-        user.setRoles(Collections.singletonList(role));        
+        user.setRoles(Collections.singletonList(role));
+        user.setIsVerified(true);
+        user.setIsActive(true);
         userRepository.save(user);
         
         Authentication authentication = authenticationManager.authenticate(
@@ -525,7 +544,9 @@ public class UserControllerTest {
         UserEntity user = new UserEntity();
         user.setEmail(email);      
         user.setPassword(passwordEncoder.encode(password));
-        user.setRoles(Collections.singletonList(role));          
+        user.setRoles(Collections.singletonList(role));
+        user.setIsVerified(true);
+        user.setIsActive(true);
         userRepository.save(user);
         
         Authentication authentication = authenticationManager.authenticate(

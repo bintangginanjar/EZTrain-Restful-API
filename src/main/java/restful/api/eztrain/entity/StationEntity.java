@@ -41,7 +41,9 @@ public class StationEntity {
 
     private String city;
 
-    private String province;    
+    private String province;
+    
+    private Boolean isActive;
 
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")

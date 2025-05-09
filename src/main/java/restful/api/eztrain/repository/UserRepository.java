@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import restful.api.eztrain.entity.UserEntity;
 
 @Repository
-public interface UserRepository extends JpaRepository<UserEntity, Integer>{
+public interface UserRepository extends JpaRepository<UserEntity, Long>{
 
     Optional<UserEntity> findByEmail(String email);
 

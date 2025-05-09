@@ -49,9 +49,9 @@ public class UserEntity {
 
     private String phoneNumber;
 
-    private boolean isVerified;
+    private Boolean isVerified;
 
-    private boolean isActive;
+    private Boolean isActive;
 
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")

@@ -60,8 +60,8 @@ public class UserService {
         user.setEmail(request.getEmail());       
         user.setPassword(passwordEncoder.encode(request.getPassword()));        
         user.setRoles(Collections.singletonList(role)); 
-        user.setVerified(false);
-        user.setActive(false);
+        user.setIsVerified(false);
+        user.setIsActive(false);
 
         userRepository.save(user);        
 
@@ -97,12 +97,12 @@ public class UserService {
             user.setPhoneNumber(request.getPhoneNumber());
         }
 
-        if (Objects.nonNull(request.isVerified())) {
-            user.setVerified(request.isVerified());
+        if (Objects.nonNull(request.getIsVerified())) {
+            user.setIsVerified(request.getIsVerified());
         }
 
-        if (Objects.nonNull(request.isActive())) {
-            user.setActive(request.isActive());
+        if (Objects.nonNull(request.getIsActive())) {
+            user.setIsActive(request.getIsActive());
         }
 
         userRepository.save(user);        
