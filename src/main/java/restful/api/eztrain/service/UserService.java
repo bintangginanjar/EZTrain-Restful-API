@@ -3,8 +3,13 @@ package restful.api.eztrain.service;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -108,10 +113,17 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public List<UserResponse> list() {   
+    public Page<UserResponse> getAllUsers(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<UserEntity> users = userRepository.findAll(pageable);
 
-        List<UserEntity> users = userRepository.findAll();
+        List<UserResponse> userResponses = users
+                                            .getContent()
+                                            .stream()
+                                            .map(p -> ResponseMapper.ToUserResponseMapper(p))
+                                            .collect(Collectors.toList()); 
 
-        return ResponseMapper.ToUserResponseListMapper(users);
+        return new PageImpl<>(userResponses, pageable, users.getTotalElements());
     }
+    
 }

@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.util.Collections;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -578,6 +579,262 @@ public class UserControllerTest {
             });
 
             assertEquals(false, response.getStatus());                     
+        });
+    }
+
+    @Test
+    void testGetAllUserSuccess() throws Exception {  
+        RoleEntity role = roleRepository.findByName("ROLE_ADMIN").orElse(null);
+
+        UserEntity user = new UserEntity();
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRoles(Collections.singletonList(role));
+        user.setIsVerified(true);
+        user.setIsActive(true);
+        userRepository.save(user);
+        
+        RoleEntity roleUser = roleRepository.findByName("ROLE_USER").orElse(null);
+
+        for (int i = 0; i < 49; i++) {
+            UserEntity commonUser = new UserEntity();
+            commonUser.setEmail(email + i);      
+            commonUser.setPassword(passwordEncoder.encode(password));
+            commonUser.setRoles(Collections.singletonList(roleUser));
+            commonUser.setIsVerified(true);
+            commonUser.setIsActive(true);
+            userRepository.save(commonUser);
+        }
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                get("/api/users/list")
+                        .accept(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                                             
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+                WebResponse<List<UserResponse>> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(true, response.getStatus());
+            assertEquals(10, response.getData().size());
+            assertEquals(5, response.getPaging().getTotalPage());
+            assertEquals(0, response.getPaging().getCurrentPage());
+            assertEquals(10, response.getPaging().getSize());
+        });
+    }
+
+    @Test
+    void testGetAllUserInvalidToken() throws Exception {  
+        RoleEntity role = roleRepository.findByName("ROLE_ADMIN").orElse(null);
+
+        UserEntity user = new UserEntity();
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRoles(Collections.singletonList(role));
+        user.setIsVerified(true);
+        user.setIsActive(true);
+        userRepository.save(user);
+        
+        RoleEntity roleUser = roleRepository.findByName("ROLE_USER").orElse(null);
+
+        for (int i = 0; i < 49; i++) {
+            UserEntity commonUser = new UserEntity();
+            commonUser.setEmail(email + i);      
+            commonUser.setPassword(passwordEncoder.encode(password));
+            commonUser.setRoles(Collections.singletonList(roleUser));
+            commonUser.setIsVerified(true);
+            commonUser.setIsActive(true);
+            userRepository.save(commonUser);
+        }
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken + "a";
+
+        mockMvc.perform(
+                get("/api/users/list")
+                        .accept(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                                             
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+                WebResponse<List<UserResponse>> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });
+    }
+
+    @Test
+    void testGetAllUserTokenExpired() throws Exception {  
+        RoleEntity role = roleRepository.findByName("ROLE_ADMIN").orElse(null);
+
+        UserEntity user = new UserEntity();
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRoles(Collections.singletonList(role));
+        user.setIsVerified(true);
+        user.setIsActive(true);
+        userRepository.save(user);
+        
+        RoleEntity roleUser = roleRepository.findByName("ROLE_USER").orElse(null);
+
+        for (int i = 0; i < 49; i++) {
+            UserEntity commonUser = new UserEntity();
+            commonUser.setEmail(email + i);      
+            commonUser.setPassword(passwordEncoder.encode(password));
+            commonUser.setRoles(Collections.singletonList(roleUser));
+            commonUser.setIsVerified(true);
+            commonUser.setIsActive(true);
+            userRepository.save(commonUser);
+        }
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() - SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                get("/api/users/list")
+                        .accept(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                                             
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+                WebResponse<List<UserResponse>> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });
+    }
+
+    @Test
+    void testGetAllUserNoToken() throws Exception {  
+        RoleEntity role = roleRepository.findByName("ROLE_ADMIN").orElse(null);
+
+        UserEntity user = new UserEntity();
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRoles(Collections.singletonList(role));
+        user.setIsVerified(true);
+        user.setIsActive(true);
+        userRepository.save(user);
+        
+        RoleEntity roleUser = roleRepository.findByName("ROLE_USER").orElse(null);
+
+        for (int i = 0; i < 49; i++) {
+            UserEntity commonUser = new UserEntity();
+            commonUser.setEmail(email + i);      
+            commonUser.setPassword(passwordEncoder.encode(password));
+            commonUser.setRoles(Collections.singletonList(roleUser));
+            commonUser.setIsVerified(true);
+            commonUser.setIsActive(true);
+            userRepository.save(commonUser);
+        }
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);        
+
+        mockMvc.perform(
+                get("/api/users/list")
+                        .accept(MediaType.APPLICATION_JSON)                                                                                          
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+                WebResponse<List<UserResponse>> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });
+    }
+
+    @Test
+    void testGetAllUserBadRole() throws Exception {  
+        RoleEntity role = roleRepository.findByName("ROLE_USER").orElse(null);
+
+        UserEntity user = new UserEntity();
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRoles(Collections.singletonList(role));
+        user.setIsVerified(true);
+        user.setIsActive(true);
+        userRepository.save(user);
+        
+        RoleEntity roleUser = roleRepository.findByName("ROLE_USER").orElse(null);
+
+        for (int i = 0; i < 49; i++) {
+            UserEntity commonUser = new UserEntity();
+            commonUser.setEmail(email + i);      
+            commonUser.setPassword(passwordEncoder.encode(password));
+            commonUser.setRoles(Collections.singletonList(roleUser));
+            commonUser.setIsVerified(true);
+            commonUser.setIsActive(true);
+            userRepository.save(commonUser);
+        }
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                get("/api/users/list")
+                        .accept(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                                             
+        ).andExpectAll(
+                status().isForbidden()
+        ).andDo(result -> {
+                WebResponse<List<UserResponse>> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
         });
     }
 }
