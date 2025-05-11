@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import restful.api.eztrain.entity.StationEntity;
 import restful.api.eztrain.entity.UserEntity;
+import restful.api.eztrain.model.ForgotPasswordResponse;
 import restful.api.eztrain.model.StationResponse;
 import restful.api.eztrain.model.TokenResponse;
 import restful.api.eztrain.model.UserResponse;
@@ -44,6 +45,13 @@ public class ResponseMapper {
                 .roles(roles)
                 .build();
 
+    }
+
+    public static ForgotPasswordResponse ToForgotPasswordResponseMapper(String email, String token) {
+        return ForgotPasswordResponse.builder()
+                .email(email)
+                .token(token)
+                .build();
     }
 
     public static StationResponse ToStationResponseMapper(StationEntity station) {

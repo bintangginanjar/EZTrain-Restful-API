@@ -12,6 +12,8 @@ import restful.api.eztrain.entity.UserEntity;
 public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpecificationExecutor<UserEntity>{
 
     Optional<UserEntity> findByEmail(String email);
+    
+    Optional<UserEntity> findFirstByEmailAndToken(String email, String token);
 
     Optional<UserEntity> findFirstByToken(String token);
 

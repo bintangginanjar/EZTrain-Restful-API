@@ -1,6 +1,7 @@
 package restful.api.eztrain.service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +22,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import restful.api.eztrain.entity.UserEntity;
 import restful.api.eztrain.mapper.ResponseMapper;
+import restful.api.eztrain.model.ForgotPasswordRequest;
+import restful.api.eztrain.model.ForgotPasswordResponse;
 import restful.api.eztrain.model.LoginUserRequest;
+import restful.api.eztrain.model.ResetPasswordRequest;
 import restful.api.eztrain.model.TokenResponse;
 import restful.api.eztrain.repository.UserRepository;
 import restful.api.eztrain.security.CustomUserDetailService;
@@ -34,6 +39,9 @@ public class AuthService {
     private UserRepository userRepository;
 
     @Autowired
+    PasswordEncoder passwordEncoder;
+
+    @Autowired
     private AuthenticationManager authenticationManager;
 
     @Autowired
@@ -45,13 +53,15 @@ public class AuthService {
     @Autowired
     ValidationService validationService;
 
-    public AuthService(AuthenticationManager authenticationManager, 
-                        ValidationService validationService,
-                        JwtUtil jwtUtil, UserRepository userRepository) {        
-        this.authenticationManager = authenticationManager;
-        this.validationService = validationService;
-        this.jwtUtil = jwtUtil;
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder,
+            AuthenticationManager authenticationManager, CustomUserDetailService userDetailService, JwtUtil jwtUtil,
+            ValidationService validationService) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
+        this.userDetailService = userDetailService;
+        this.jwtUtil = jwtUtil;
+        this.validationService = validationService;
     }
 
     @Transactional
@@ -80,6 +90,44 @@ public class AuthService {
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Wrong username or password");
         }        
+    }
+
+    @Transactional
+    public ForgotPasswordResponse forgotPassword(ForgotPasswordRequest request) {
+        validationService.validate(request);
+
+        UserEntity user = userRepository.findByEmail(request.getEmail())
+                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        String token = UUID.randomUUID().toString();
+
+        user.setToken(token);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+
+        try {
+            userRepository.save(user);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "User request for password reset failed");
+        }
+        
+        return ResponseMapper.ToForgotPasswordResponseMapper(request.getEmail(), token);
+    }
+
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) {
+        UserEntity user = userRepository.findFirstByEmailAndToken(request.getEmail(), request.getToken())
+                                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setToken(null);
+        user.setTokenExpiredAt(null);
+
+        try {
+            userRepository.save(user);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "User password reset failed");
+        }        
+
     }
 
     @Transactional
