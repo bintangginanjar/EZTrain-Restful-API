@@ -1,11 +1,12 @@
 package restful.api.eztrain.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.util.Collections;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,7 +25,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import restful.api.eztrain.entity.RoleEntity;
 import restful.api.eztrain.entity.UserEntity;
+import restful.api.eztrain.model.ForgotPasswordRequest;
+import restful.api.eztrain.model.ForgotPasswordResponse;
 import restful.api.eztrain.model.LoginUserRequest;
+import restful.api.eztrain.model.ResetPasswordRequest;
 import restful.api.eztrain.model.TokenResponse;
 import restful.api.eztrain.model.WebResponse;
 import restful.api.eztrain.repository.RoleRepository;
@@ -208,6 +212,152 @@ public class AuthControllerTest {
                 status().isUnauthorized()
         ).andDo(result -> {
                 WebResponse<TokenResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });
+    }
+
+    @Test
+    void testForgotPasswordSuccess() throws Exception {
+        ForgotPasswordRequest request = new ForgotPasswordRequest();
+        request.setEmail(email);               
+
+        mockMvc.perform(
+                post("/api/auth/forgot-password")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))                        
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+                WebResponse<ForgotPasswordResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(true, response.getStatus());
+            assertEquals(request.getEmail(), response.getData().getEmail());
+            assertNotNull(response.getData().getToken());
+        });
+    }
+
+    @Test
+    void testForgotPasswordNotFound() throws Exception {
+        ForgotPasswordRequest request = new ForgotPasswordRequest();
+        request.setEmail(email + "notfound");               
+
+        mockMvc.perform(
+                post("/api/auth/forgot-password")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))                        
+        ).andExpectAll(
+                status().isNotFound()
+        ).andDo(result -> {
+                WebResponse<ForgotPasswordResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });
+    }
+
+    @Test
+    void testForgotPasswordBlank() throws Exception {
+        ForgotPasswordRequest request = new ForgotPasswordRequest();
+        request.setEmail("");               
+
+        mockMvc.perform(
+                post("/api/auth/forgot-password")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))                        
+        ).andExpectAll(
+                status().isBadRequest()
+        ).andDo(result -> {
+                WebResponse<ForgotPasswordResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });
+    }
+
+    @Test
+    void testResetPasswordSuccess() throws Exception {
+        String token = UUID.randomUUID().toString();
+
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        user.setToken(token);
+        userRepository.save(user);
+
+        ResetPasswordRequest request = new ResetPasswordRequest();
+        request.setEmail(email);
+        request.setToken(token);
+        request.setPassword(password + "new");       
+
+        mockMvc.perform(
+                post("/api/auth/reset-password")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))                        
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+                WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(true, response.getStatus());
+        });
+    }
+
+    @Test
+    void testResetPasswordBlank() throws Exception {
+        String token = UUID.randomUUID().toString();
+
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        user.setToken(token);
+        userRepository.save(user);
+
+        ResetPasswordRequest request = new ResetPasswordRequest();
+        request.setEmail(email);
+        request.setToken("");
+        request.setPassword("");       
+
+        mockMvc.perform(
+                post("/api/auth/reset-password")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))                        
+        ).andExpectAll(
+                status().isBadRequest()
+        ).andDo(result -> {
+                WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });
+    }
+
+    @Test
+    void testResetPasswordNotFound() throws Exception {
+        String token = UUID.randomUUID().toString();
+
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        user.setToken(token);
+        userRepository.save(user);
+
+        ResetPasswordRequest request = new ResetPasswordRequest();
+        request.setEmail(email + "notfound");
+        request.setToken(token + "notfound");
+        request.setPassword(password + "new");       
+
+        mockMvc.perform(
+                post("/api/auth/reset-password")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))                        
+        ).andExpectAll(
+                status().isNotFound()
+        ).andDo(result -> {
+                WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
             });
 
             assertEquals(false, response.getStatus());

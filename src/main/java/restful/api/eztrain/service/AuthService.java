@@ -115,6 +115,8 @@ public class AuthService {
 
     @Transactional
     public void resetPassword(ResetPasswordRequest request) {
+        validationService.validate(request);
+        
         UserEntity user = userRepository.findFirstByEmailAndToken(request.getEmail(), request.getToken())
                                             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
