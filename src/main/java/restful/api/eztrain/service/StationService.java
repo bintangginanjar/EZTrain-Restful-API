@@ -45,7 +45,11 @@ public class StationService {
         validationService.validate(request);
 
         UserEntity user = userRepository.findByEmail(authentication.getName())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));        
+
+        if (stationRepository.findByCode(request.getCode()).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Station already registered");
+        }
 
         StationEntity station = new StationEntity();
         station.setCode(request.getCode());
@@ -79,20 +83,24 @@ public class StationService {
     }
 
     @Transactional(readOnly = true)
-    public List<StationResponse> listByUser(Authentication authentication) {
-        UserEntity user = userRepository.findByEmail(authentication.getName())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-
-        List<StationEntity> stations = stationRepository.findAllByUserEntity(user);
+    public List<StationResponse> list() {        
+        List<StationEntity> stations = stationRepository.findAll();
 
         return ResponseMapper.ToStationResponseListMapper(stations);
     }
 
     @Transactional(readOnly = true)
-    public List<StationResponse> list() {        
-        List<StationEntity> stations = stationRepository.findAll();
+    public Page<StationResponse> getAllStations(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<StationEntity> stations = stationRepository.findAll(pageable);
 
-        return ResponseMapper.ToStationResponseListMapper(stations);
+        List<StationResponse> stationResponses = stations
+                                            .getContent()
+                                            .stream()
+                                            .map(p -> ResponseMapper.ToStationResponseMapper(p))
+                                            .collect(Collectors.toList()); 
+
+        return new PageImpl<>(stationResponses, pageable, stations.getTotalElements());
     }
 
     @Transactional
@@ -108,7 +116,7 @@ public class StationService {
         UserEntity user = userRepository.findByEmail(authentication.getName())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        StationEntity station = stationRepository.findByUserEntityAndId(user, stationId)
+        StationEntity station = stationRepository.findById(stationId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Station not found"));
 
         if (Objects.nonNull(request.getCode())) {
@@ -127,6 +135,7 @@ public class StationService {
             station.setProvince(request.getProvince());
         }
 
+        station.setUserEntity(user);
         stationRepository.save(station);
 
         return ResponseMapper.ToStationResponseMapper(station);
@@ -147,7 +156,6 @@ public class StationService {
 
         StationEntity station = stationRepository.findByUserEntityAndId(user, stationId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Station not found"));
-
         
         try {
             stationRepository.delete(station);
