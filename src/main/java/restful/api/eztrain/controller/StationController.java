@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import restful.api.eztrain.model.PagingResponse;
 import restful.api.eztrain.model.RegisterStationRequest;
+import restful.api.eztrain.model.SearchStationRequest;
 import restful.api.eztrain.model.StationResponse;
 import restful.api.eztrain.model.UpdateStationRequest;
 import restful.api.eztrain.model.WebResponse;
@@ -48,7 +49,7 @@ public class StationController {
                                         .build();      
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
     @GetMapping(
         path = "/api/stations/{stationId}",        
         produces = MediaType.APPLICATION_JSON_VALUE
@@ -123,5 +124,40 @@ public class StationController {
                                                     .size(response.getSize())
                                                     .build())
                                             .build();
+    }
+
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
+    @GetMapping(
+        path = "/api/stations/search",        
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public WebResponse<List<StationResponse>> search(Authentication authentication,
+                                                        @RequestParam(value = "code", required = false) String code, 
+                                                        @RequestParam(value = "name", required = false) String name,
+                                                        @RequestParam(value = "city", required = false) String city,
+                                                        @RequestParam(value = "province", required = false) String province,
+                                                        @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
+                                                        @RequestParam(value = "size", required = false, defaultValue = "10") Integer size) {
+        SearchStationRequest request = SearchStationRequest.builder()
+                                        .page(page)
+                                        .size(size)
+                                        .code(code)
+                                        .name(name)
+                                        .city(city)
+                                        .province(province)
+                                        .build();
+
+        Page<StationResponse> response = stationService.search(request);
+        return WebResponse.<List<StationResponse>>builder()
+                            .status(true)
+                            .messages("Station search executed successfully")
+                            .errors(null)
+                            .data(response.getContent())
+                            .paging(PagingResponse.builder()
+                                .currentPage(response.getNumber())
+                                .totalPage(response.getTotalPages())
+                                .size(response.getSize())
+                                .build())
+                            .build();
     }
 }
