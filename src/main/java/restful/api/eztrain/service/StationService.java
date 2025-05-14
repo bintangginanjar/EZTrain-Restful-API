@@ -58,7 +58,12 @@ public class StationService {
         station.setProvince(request.getProvince());
         station.setIsActive(true);
         station.setUserEntity(user);
-        stationRepository.save(station);
+
+        try {
+            stationRepository.save(station);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Register station failed");
+        }
 
         return ResponseMapper.ToStationResponseMapper(station);
     }
@@ -76,17 +81,10 @@ public class StationService {
         UserEntity user = userRepository.findByEmail(authentication.getName())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        StationEntity station = stationRepository.findByUserEntityAndId(user, stationId)
+        StationEntity station = stationRepository.findFirstByUserEntityAndId(user, stationId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Station not found"));
 
         return ResponseMapper.ToStationResponseMapper(station);
-    }
-
-    @Transactional(readOnly = true)
-    public List<StationResponse> list() {        
-        List<StationEntity> stations = stationRepository.findAll();
-
-        return ResponseMapper.ToStationResponseListMapper(stations);
     }
 
     @Transactional(readOnly = true)
@@ -136,7 +134,12 @@ public class StationService {
         }
 
         station.setUserEntity(user);
-        stationRepository.save(station);
+
+        try {
+            stationRepository.save(station);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Update station failed");
+        }        
 
         return ResponseMapper.ToStationResponseMapper(station);
     }
@@ -154,13 +157,13 @@ public class StationService {
         UserEntity user = userRepository.findByEmail(authentication.getName())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        StationEntity station = stationRepository.findByUserEntityAndId(user, stationId)
+        StationEntity station = stationRepository.findFirstByUserEntityAndId(user, stationId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Station not found"));
         
         try {
             stationRepository.delete(station);
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Delete product failed");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Delete station failed");
         }        
     }
 

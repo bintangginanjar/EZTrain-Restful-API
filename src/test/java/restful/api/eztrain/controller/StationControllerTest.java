@@ -712,6 +712,7 @@ public class StationControllerTest {
 
         mockMvc.perform(
                 get("/api/stations")
+                        .queryParam("code", bdCode)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)                        
                         .header("Authorization", mockBearerToken)                        
@@ -724,6 +725,100 @@ public class StationControllerTest {
             assertEquals(true, response.getStatus());            
             assertEquals(10, response.getData().size());
             assertEquals(5, response.getPaging().getTotalPage());
+            assertEquals(0, response.getPaging().getCurrentPage());
+            assertEquals(10, response.getPaging().getSize());
+        });
+
+        mockMvc.perform(
+                get("/api/stations")
+                        .queryParam("name", bdName)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+                WebResponse<List<StationResponse>> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(true, response.getStatus());            
+            assertEquals(10, response.getData().size());
+            assertEquals(5, response.getPaging().getTotalPage());
+            assertEquals(0, response.getPaging().getCurrentPage());
+            assertEquals(10, response.getPaging().getSize());
+        });
+
+        mockMvc.perform(
+                get("/api/stations")
+                        .queryParam("city", bdCity)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+                WebResponse<List<StationResponse>> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(true, response.getStatus());            
+            assertEquals(10, response.getData().size());
+            assertEquals(5, response.getPaging().getTotalPage());
+            assertEquals(0, response.getPaging().getCurrentPage());
+            assertEquals(10, response.getPaging().getSize());
+        });
+
+        mockMvc.perform(
+                get("/api/stations")
+                        .queryParam("code", bdProvince)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+                WebResponse<List<StationResponse>> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(true, response.getStatus());            
+            assertEquals(10, response.getData().size());
+            assertEquals(5, response.getPaging().getTotalPage());
+            assertEquals(0, response.getPaging().getCurrentPage());
+            assertEquals(10, response.getPaging().getSize());
+        });
+    }
+
+    @Test
+    void testGetAllStationNotFound() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                get("/api/stations")
+                        .queryParam("code", bdCode)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+                WebResponse<List<StationResponse>> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(true, response.getStatus());            
+            assertEquals(0, response.getData().size());
+            assertEquals(0, response.getPaging().getTotalPage());
             assertEquals(0, response.getPaging().getCurrentPage());
             assertEquals(10, response.getPaging().getSize());
         });

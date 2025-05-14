@@ -11,7 +11,7 @@ import restful.api.eztrain.entity.UserEntity;
 
 public interface StationRepository extends JpaRepository<StationEntity, Long>, JpaSpecificationExecutor<StationEntity> {
 
-    Optional<StationEntity> findByUserEntityAndId(UserEntity user, Long stationId);
+    Optional<StationEntity> findFirstByUserEntityAndId(UserEntity user, Long stationId);
 
     Optional<StationEntity> findByCode(String code);
 

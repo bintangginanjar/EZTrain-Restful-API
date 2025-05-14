@@ -21,4 +21,6 @@ public class StationResponse {
 
     private String province;
 
+    private Boolean isActive;
+
 }
