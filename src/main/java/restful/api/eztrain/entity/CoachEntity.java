@@ -34,6 +34,8 @@ public class CoachEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String coachName;
+
     private Integer coachNumber;
     
     private String coachType;

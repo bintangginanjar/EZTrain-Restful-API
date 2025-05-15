@@ -1,5 +1,7 @@
 package restful.api.eztrain.model;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,5 +22,7 @@ public class TrainResponse {
     private String operator;
 
     private Boolean isActive;
+
+    private List<String> coach;
 
 }

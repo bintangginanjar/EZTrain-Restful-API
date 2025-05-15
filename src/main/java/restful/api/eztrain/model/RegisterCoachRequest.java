@@ -13,6 +13,9 @@ import lombok.NoArgsConstructor;
 @Builder
 public class RegisterCoachRequest {
 
+    @NotBlank
+    private String coachName;
+
     @NotNull
     private Integer coachNumber;
     

@@ -1,5 +1,6 @@
 package restful.api.eztrain.model;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,14 +10,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CoachResponse {
-    
-    private Long id;
-
-    private String coachName;
+public class SearchCoachRequest {
 
     private Integer coachNumber;
     
     private String coachType;
 
+    @NotNull
+    private Integer page;
+
+    @NotNull
+    private Integer size;
 }

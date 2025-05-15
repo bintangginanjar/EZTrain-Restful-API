@@ -83,12 +83,15 @@ public class ResponseMapper {
     }
 
     public static TrainResponse ToTrainResponseMapper(TrainEntity train) {
+        List<String> coaches = train.getCoaches().stream().map(p -> p.getCoachName()).toList();
+
         return TrainResponse.builder()
                 .id(train.getId())                                
                 .name(train.getName())
                 .trainType(train.getTrainType())
                 .operator(train.getOperator())
                 .isActive(train.getIsActive())
+                .coach(coaches)
                 .build();
     }
 
@@ -100,7 +103,8 @@ public class ResponseMapper {
                                     p.getName(),
                                     p.getTrainType(),
                                     p.getOperator(),
-                                    p.getIsActive()
+                                    p.getIsActive(),
+                                    p.getCoaches().stream().map(s -> s.getCoachName()).toList()
                                 )).collect(Collectors.toList());
     }
 

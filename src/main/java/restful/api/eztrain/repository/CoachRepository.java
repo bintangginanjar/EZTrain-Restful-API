@@ -7,8 +7,9 @@ import restful.api.eztrain.entity.CoachEntity;
 import java.util.Optional;
 
 
+
 public interface CoachRepository extends JpaRepository<CoachEntity, Long>, JpaSpecificationExecutor<CoachEntity>{
 
-    Optional<CoachEntity> findByCoachType(String coachType);
+    Optional<CoachEntity> findByCoachName(String coachName);
 
 }

@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.persistence.criteria.Predicate;
+import restful.api.eztrain.entity.CoachEntity;
 import restful.api.eztrain.entity.TrainEntity;
 import restful.api.eztrain.entity.UserEntity;
 import restful.api.eztrain.mapper.ResponseMapper;
@@ -25,6 +26,7 @@ import restful.api.eztrain.model.RegisterTrainRequest;
 import restful.api.eztrain.model.SearchTrainRequest;
 import restful.api.eztrain.model.TrainResponse;
 import restful.api.eztrain.model.UpdateTrainRequest;
+import restful.api.eztrain.repository.CoachRepository;
 import restful.api.eztrain.repository.TrainRepository;
 import restful.api.eztrain.repository.UserRepository;
 
@@ -38,14 +40,10 @@ public class TrainService {
     private TrainRepository trainRepository;
 
     @Autowired
-    private ValidationService validationService;
+    private CoachRepository coachRepository;
 
-    public TrainService(UserRepository userRepository, TrainRepository trainRepository,
-            ValidationService validationService) {
-        this.userRepository = userRepository;
-        this.trainRepository = trainRepository;
-        this.validationService = validationService;
-    }
+    @Autowired
+    private ValidationService validationService;
 
     @Transactional
     public TrainResponse register(Authentication authentication, RegisterTrainRequest request) {
@@ -203,6 +201,35 @@ public class TrainService {
                                                     .collect(Collectors.toList());
 
         return new PageImpl<>(trainResponses, pageable, trains.getTotalElements());
+    }
+
+    @Transactional
+    public TrainResponse assignCoach(String strTrainId, String strCoachId) {
+        Long trainId;
+        Long coachId;
+
+        try {
+            trainId = Long.parseLong(strTrainId);
+            coachId = Long.parseLong(strCoachId);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
+        }
+
+        TrainEntity train = trainRepository.findById(trainId)
+                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Train not found"));
+
+        CoachEntity coach = coachRepository.findById(coachId)
+                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Coach not found"));
+
+        train.getCoaches().add(coach);
+
+        try {
+            trainRepository.save(train);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Assigning coach to train failed");
+        }
+
+        return ResponseMapper.ToTrainResponseMapper(train);
     }
 
 }
