@@ -160,4 +160,23 @@ public class TrainController {
                                                     .build())
                                             .build();
     }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping(
+        path = "/api/trains/{trainId}/coaches/{coachId}",
+        consumes = MediaType.APPLICATION_JSON_VALUE,        
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public WebResponse<TrainResponse> assignCoach(Authentication authentication, 
+                                            @PathVariable("trainId") String trainId,
+                                            @PathVariable("coach") String coachId) {        
+        
+        TrainResponse response = trainService.assignCoach(trainId, coachId);
+
+        return WebResponse.<TrainResponse>builder()
+                                        .status(true)
+                                        .messages("Train assigning coach success")
+                                        .data(response)
+                                        .build();      
+    }
 }
