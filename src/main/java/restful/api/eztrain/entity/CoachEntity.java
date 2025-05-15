@@ -34,6 +34,7 @@ public class CoachEntity {
     private Long id;
 
     private Integer coachNumber;
+    
     private String coachType;
 
     @ManyToOne

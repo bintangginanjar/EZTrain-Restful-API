@@ -4,10 +4,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import restful.api.eztrain.entity.StationEntity;
+import restful.api.eztrain.entity.TrainEntity;
 import restful.api.eztrain.entity.UserEntity;
 import restful.api.eztrain.model.ForgotPasswordResponse;
 import restful.api.eztrain.model.StationResponse;
 import restful.api.eztrain.model.TokenResponse;
+import restful.api.eztrain.model.TrainResponse;
 import restful.api.eztrain.model.UserResponse;
 
 public class ResponseMapper {
@@ -61,6 +63,7 @@ public class ResponseMapper {
                 .name(station.getName())
                 .city(station.getCity())
                 .province(station.getProvince())
+                .isActive(station.getIsActive())
                 .build();
     }
 
@@ -72,8 +75,30 @@ public class ResponseMapper {
                                     p.getCode(),                
                                     p.getName(),
                                     p.getCity(),
-                                    p.getProvince()
+                                    p.getProvince(),
+                                    p.getIsActive()
                                 )).collect(Collectors.toList());
     }
 
+    public static TrainResponse ToTrainResponseMapper(TrainEntity train) {
+        return TrainResponse.builder()
+                .id(train.getId())                                
+                .name(train.getName())
+                .trainType(train.getTrainType())
+                .operator(train.getOperator())
+                .isActive(train.getIsActive())
+                .build();
+    }
+
+    public static List<TrainResponse> ToTrainResponseListMapper(List<TrainEntity> trains) {
+        return trains.stream()
+                            .map(
+                                p -> new TrainResponse(
+                                    p.getId(),                                                         
+                                    p.getName(),
+                                    p.getTrainType(),
+                                    p.getOperator(),
+                                    p.getIsActive()
+                                )).collect(Collectors.toList());
+    }
 }

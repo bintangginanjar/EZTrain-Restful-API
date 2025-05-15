@@ -32,7 +32,8 @@ public class UserController {
     }
 
     @PostMapping(
-        path = "/api/users",        
+        path = "/api/users",
+        consumes = MediaType.APPLICATION_JSON_VALUE,        
         produces = MediaType.APPLICATION_JSON_VALUE
     )
     public WebResponse<UserResponse> create(@RequestBody RegisterUserRequest request) {

@@ -33,9 +33,14 @@ public class TrainEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, unique = true)
     private String name;
+    
     private String trainType;
+    
     private String operator;
+
+    private Boolean isActive;
 
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")

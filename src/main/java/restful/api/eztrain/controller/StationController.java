@@ -36,7 +36,8 @@ public class StationController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(
-        path = "/api/stations",        
+        path = "/api/stations",
+        consumes = MediaType.APPLICATION_JSON_VALUE,        
         produces = MediaType.APPLICATION_JSON_VALUE
     )
     public WebResponse<StationResponse> register(Authentication authentication, @RequestBody RegisterStationRequest request) {
@@ -147,7 +148,8 @@ public class StationController {
                                         .province(province)
                                         .build();
 
-        Page<StationResponse> response = stationService.search(request);
+        Page<StationResponse> response = stationService.search(authentication, request);
+        
         return WebResponse.<List<StationResponse>>builder()
                             .status(true)
                             .messages("Station search executed successfully")
