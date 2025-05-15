@@ -58,7 +58,7 @@ public class TrainController {
     public WebResponse<TrainResponse> get(Authentication authentication, 
                                         @PathVariable("trainId") String trainId) { 
 
-        TrainResponse response = trainService.get(authentication, trainId);
+        TrainResponse response = trainService.get(trainId);
 
         return WebResponse.<TrainResponse>builder()
                                             .status(true)
@@ -96,7 +96,7 @@ public class TrainController {
     public WebResponse<String> delete(Authentication authentication,
                                             @PathVariable("trainId") String trainId) {
 
-        trainService.delete(authentication, trainId);
+        trainService.delete(trainId);
 
         return WebResponse.<String>builder()
                                         .status(true)
@@ -147,7 +147,7 @@ public class TrainController {
                                         .operator(operator)
                                         .build();
 
-        Page<TrainResponse> response = trainService.search(authentication, request);
+        Page<TrainResponse> response = trainService.search(request);
 
         return WebResponse.<List<TrainResponse>>builder()
                                             .status(true)

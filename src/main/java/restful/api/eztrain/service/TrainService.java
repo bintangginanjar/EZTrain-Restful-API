@@ -75,19 +75,16 @@ public class TrainService {
     }
 
     @Transactional(readOnly = true)
-    public TrainResponse get(Authentication authentication, String strTrainId) {
+    public TrainResponse get(String strTrainId) {
         Long trainId;
 
         try {
             trainId = Long.parseLong(strTrainId);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
-        }
+        }        
 
-        UserEntity user = userRepository.findByEmail(authentication.getName())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-
-        TrainEntity train = trainRepository.findFirstByUserEntityAndId(user, trainId)
+        TrainEntity train = trainRepository.findById(trainId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Train not found"));
 
         return ResponseMapper.ToTrainResponseMapper(train);
@@ -120,7 +117,7 @@ public class TrainService {
         UserEntity user = userRepository.findByEmail(authentication.getName())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        TrainEntity train = trainRepository.findFirstByUserEntityAndId(user, trainId)
+        TrainEntity train = trainRepository.findById(trainId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Train not found"));
 
         if (Objects.nonNull(request.getName())) {
@@ -151,7 +148,7 @@ public class TrainService {
     }
 
     @Transactional
-    public void delete(Authentication authentication, String strTrainId) {
+    public void delete(String strTrainId) {
         Long trainId;
 
         try {
@@ -160,10 +157,7 @@ public class TrainService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
         }
 
-        UserEntity user = userRepository.findByEmail(authentication.getName())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-
-        TrainEntity train = trainRepository.findFirstByUserEntityAndId(user, trainId)
+        TrainEntity train = trainRepository.findById(trainId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Train not found"));
 
         try {
@@ -175,11 +169,7 @@ public class TrainService {
 
     @SuppressWarnings("null")
     @Transactional(readOnly = true)
-    public Page<TrainResponse> search(Authentication authentication, SearchTrainRequest request) {
-        if (userRepository.findByEmail(authentication.getName()) == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found");
-        }
-
+    public Page<TrainResponse> search(SearchTrainRequest request) {
         Specification<TrainEntity> specification = (root, query, builder) -> {
             List<Predicate> predicates = new ArrayList<>();            
             

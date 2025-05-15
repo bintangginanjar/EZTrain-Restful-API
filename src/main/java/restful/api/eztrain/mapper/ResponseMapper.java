@@ -3,9 +3,11 @@ package restful.api.eztrain.mapper;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import restful.api.eztrain.entity.CoachEntity;
 import restful.api.eztrain.entity.StationEntity;
 import restful.api.eztrain.entity.TrainEntity;
 import restful.api.eztrain.entity.UserEntity;
+import restful.api.eztrain.model.CoachResponse;
 import restful.api.eztrain.model.ForgotPasswordResponse;
 import restful.api.eztrain.model.StationResponse;
 import restful.api.eztrain.model.TokenResponse;
@@ -100,5 +102,12 @@ public class ResponseMapper {
                                     p.getOperator(),
                                     p.getIsActive()
                                 )).collect(Collectors.toList());
+    }
+
+    public static CoachResponse ToCoachResponseMapper(CoachEntity coach) {
+        return CoachResponse.builder()                
+                .coachNumber(coach.getCoachNumber())
+                .coachType(coach.getCoachType())
+                .build();
     }
 }

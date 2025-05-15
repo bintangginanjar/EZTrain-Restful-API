@@ -58,7 +58,7 @@ public class StationController {
     public WebResponse<StationResponse> get(Authentication authentication, 
                                         @PathVariable("stationId") String stationId) { 
 
-        StationResponse response = stationService.get(authentication, stationId);
+        StationResponse response = stationService.get(stationId);
 
         return WebResponse.<StationResponse>builder()
                                             .status(true)
@@ -96,7 +96,7 @@ public class StationController {
     public WebResponse<String> delete(Authentication authentication,
                                             @PathVariable("stationId") String stationId) {
 
-        stationService.delete(authentication, stationId);
+        stationService.delete(stationId);
 
         return WebResponse.<String>builder()
                                         .status(true)

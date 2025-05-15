@@ -33,8 +33,7 @@ public class SeatEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String seatNumber;
-    private String seatClass;
+    private String seatNumber;    
 
     @ManyToOne
     @JoinColumn(name = "coach_id", nullable = false, referencedColumnName = "id")

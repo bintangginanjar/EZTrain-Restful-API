@@ -13,6 +13,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -37,9 +38,7 @@ public class CoachEntity {
     
     private String coachType;
 
-    @ManyToOne
-    @JoinColumn(name = "train_id", nullable = false, referencedColumnName = "id")
-    private TrainEntity trainEntity;
+    private Boolean isActive;
 
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
@@ -54,6 +53,9 @@ public class CoachEntity {
 
     @OneToMany(mappedBy = "coachEntity", cascade = CascadeType.ALL)
     private List<TicketEntity> tickets;
+
+    @ManyToMany(mappedBy = "coaches", cascade = CascadeType.MERGE)
+    List<TrainEntity> trains;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false, referencedColumnName = "id")

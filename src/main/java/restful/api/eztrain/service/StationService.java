@@ -69,7 +69,7 @@ public class StationService {
     }
 
     @Transactional(readOnly = true)
-    public StationResponse get(Authentication authentication, String strStationId) {
+    public StationResponse get(String strStationId) {
         Long stationId;
 
         try {
@@ -78,10 +78,7 @@ public class StationService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
         }
 
-        UserEntity user = userRepository.findByEmail(authentication.getName())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-
-        StationEntity station = stationRepository.findFirstByUserEntityAndId(user, stationId)
+        StationEntity station = stationRepository.findById(stationId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Station not found"));
 
         return ResponseMapper.ToStationResponseMapper(station);
@@ -145,7 +142,7 @@ public class StationService {
     }
 
     @Transactional
-    public void delete(Authentication authentication, String strStationId) {
+    public void delete(String strStationId) {
         Long stationId;
 
         try {
@@ -154,10 +151,7 @@ public class StationService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
         }
 
-        UserEntity user = userRepository.findByEmail(authentication.getName())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-
-        StationEntity station = stationRepository.findFirstByUserEntityAndId(user, stationId)
+        StationEntity station = stationRepository.findById(stationId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Station not found"));
         
         try {

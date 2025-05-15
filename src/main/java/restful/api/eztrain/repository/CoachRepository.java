@@ -1,0 +1,14 @@
+package restful.api.eztrain.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
+import restful.api.eztrain.entity.CoachEntity;
+import java.util.Optional;
+
+
+public interface CoachRepository extends JpaRepository<CoachEntity, Long>, JpaSpecificationExecutor<CoachEntity>{
+
+    Optional<CoachEntity> findByCoachType(String coachType);
+
+}
