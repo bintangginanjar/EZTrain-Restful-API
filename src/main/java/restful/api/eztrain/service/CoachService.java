@@ -19,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.persistence.criteria.Predicate;
 import restful.api.eztrain.entity.CoachEntity;
+import restful.api.eztrain.entity.CoachTypeEntity;
 import restful.api.eztrain.entity.SeatEntity;
 import restful.api.eztrain.entity.UserEntity;
 import restful.api.eztrain.mapper.ResponseMapper;
@@ -27,6 +28,7 @@ import restful.api.eztrain.model.RegisterCoachRequest;
 import restful.api.eztrain.model.SearchCoachRequest;
 import restful.api.eztrain.model.UpdateCoachRequest;
 import restful.api.eztrain.repository.CoachRepository;
+import restful.api.eztrain.repository.CoachTypeRepository;
 import restful.api.eztrain.repository.SeatRepository;
 import restful.api.eztrain.repository.UserRepository;
 
@@ -40,6 +42,9 @@ public class CoachService {
     private CoachRepository coachRepository;
 
     @Autowired
+    private CoachTypeRepository coachTypeRepository;
+
+    @Autowired
     private SeatRepository seatRepository;
 
     @Autowired
@@ -48,7 +53,7 @@ public class CoachService {
     @Transactional
     public CoachResponse register(Authentication authentication, RegisterCoachRequest request) {
         validationService.validate(request);
-
+        
         UserEntity user = userRepository.findByEmail(authentication.getName())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));                
 
@@ -56,10 +61,21 @@ public class CoachService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Coach already registered");
         }
 
+        Long coachTypeId;
+
+        try {        
+            coachTypeId = Long.parseLong(request.getCoachType());
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
+        }
+        
+        CoachTypeEntity coachType = coachTypeRepository.findById(coachTypeId)
+                                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Coach type not found"));
+
         CoachEntity coach = new CoachEntity();
         coach.setCoachName(request.getCoachName());
         coach.setCoachNumber(request.getCoachNumber());
-        coach.setCoachType(request.getCoachType());
+        coach.setCoachTypeEntity(coachType);
         coach.setIsActive(true);
         coach.setUserEntity(user);
 
@@ -106,9 +122,11 @@ public class CoachService {
     @Transactional
     public CoachResponse update(Authentication authentication, UpdateCoachRequest request, String strCoachId) {
         Long coachId;
+        Long coachTypeId;
 
         try {        
             coachId = Long.parseLong(strCoachId);
+            coachTypeId = Long.parseLong(request.getCoachType());
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
         }
@@ -117,14 +135,17 @@ public class CoachService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         CoachEntity coach = coachRepository.findById(coachId)
-                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Coach not found"));
+                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Coach not found"));       
+        
+        CoachTypeEntity coachType = coachTypeRepository.findById(coachTypeId)
+                                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Coach type not found"));
 
         if (Objects.nonNull(request.getCoachName())) {
             coach.setCoachName(request.getCoachName());
         }
         
         if (Objects.nonNull(request.getCoachType())) {
-            coach.setCoachType(request.getCoachType());
+            coach.setCoachTypeEntity(coachType);
         }
         
         if (Objects.nonNull(request.getCoachNumber())) {

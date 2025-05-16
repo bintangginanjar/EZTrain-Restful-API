@@ -7,9 +7,10 @@ import org.springframework.stereotype.Repository;
 import restful.api.eztrain.entity.CoachEntity;
 import java.util.Optional;
 
+
 @Repository
 public interface CoachRepository extends JpaRepository<CoachEntity, Long>, JpaSpecificationExecutor<CoachEntity>{
 
-    Optional<CoachEntity> findByCoachName(String coachName);
+    Optional<CoachEntity> findByCoachName(String coachName);    
 
 }

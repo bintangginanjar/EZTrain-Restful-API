@@ -41,7 +41,10 @@ public class CoachEntity {
 
     private Integer coachNumber;
     
-    private String coachType;
+    //private String coachType;
+    @ManyToOne
+    @JoinColumn(name = "coach_type_id", nullable = false, referencedColumnName = "id")
+    private CoachTypeEntity coachTypeEntity;
 
     private Boolean isActive;
 

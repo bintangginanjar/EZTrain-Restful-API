@@ -111,7 +111,7 @@ public class ResponseMapper {
     public static CoachResponse ToCoachResponseMapper(CoachEntity coach) {
         return CoachResponse.builder()                
                 .coachNumber(coach.getCoachNumber())
-                .coachType(coach.getCoachType())
+                .coachType(coach.getCoachTypeEntity().getName())
                 .build();
     }
 }

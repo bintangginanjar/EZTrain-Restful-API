@@ -25,6 +25,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import restful.api.eztrain.entity.CoachEntity;
+import restful.api.eztrain.entity.CoachTypeEntity;
 import restful.api.eztrain.entity.RoleEntity;
 import restful.api.eztrain.entity.TrainEntity;
 import restful.api.eztrain.entity.UserEntity;
@@ -33,6 +34,7 @@ import restful.api.eztrain.model.TrainResponse;
 import restful.api.eztrain.model.UpdateTrainRequest;
 import restful.api.eztrain.model.WebResponse;
 import restful.api.eztrain.repository.CoachRepository;
+import restful.api.eztrain.repository.CoachTypeRepository;
 import restful.api.eztrain.repository.RoleRepository;
 import restful.api.eztrain.repository.TrainRepository;
 import restful.api.eztrain.repository.UserRepository;
@@ -57,7 +59,10 @@ public class TrainControllerTest {
     private TrainRepository trainRepository;
 
     @Autowired
-    private CoachRepository coachRepository;
+    private CoachRepository coachRepository; 
+    
+    @Autowired
+    private CoachTypeRepository coachTypeRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -84,11 +89,11 @@ public class TrainControllerTest {
 
     private final String panCoachName = "Panomaric 1";
     private final Integer panCoachNumber = 1;
-    private final String panCoachType = "Panomaric";
+    private final String panCoachType = "Panoramic";
 
     @BeforeEach
     void setUp() {                
-
+        
         trainRepository.deleteAll();
         coachRepository.deleteAll();
         userRepository.deleteAll();
@@ -101,7 +106,7 @@ public class TrainControllerTest {
         user.setRoles(Collections.singletonList(role));
         user.setIsVerified(true);
         user.setIsActive(true);        
-        userRepository.save(user);
+        userRepository.save(user);        
     }
 
     @Test
@@ -2010,10 +2015,13 @@ public class TrainControllerTest {
     void testAssignCoachTrainSuccess() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
+        CoachTypeEntity eksType = coachTypeRepository.findByName(eksCoachType).orElse(null);
+        CoachTypeEntity panType = coachTypeRepository.findByName(panCoachType).orElse(null);
+
         CoachEntity eksCoach = new CoachEntity();
         eksCoach.setCoachName(eksCoachName);
         eksCoach.setCoachNumber(eksCoachNumber);
-        eksCoach.setCoachType(eksCoachType);
+        eksCoach.setCoachTypeEntity(eksType);
         eksCoach.setIsActive(true);
         eksCoach.setUserEntity(user);
         coachRepository.save(eksCoach);
@@ -2021,7 +2029,7 @@ public class TrainControllerTest {
         CoachEntity panCoach = new CoachEntity();
         panCoach.setCoachName(panCoachName);
         panCoach.setCoachNumber(panCoachNumber);
-        panCoach.setCoachType(panCoachType);
+        panCoach.setCoachTypeEntity(panType);
         panCoach.setIsActive(true);
         panCoach.setUserEntity(user);
         coachRepository.save(panCoach);
@@ -2090,10 +2098,12 @@ public class TrainControllerTest {
     void testAssignCoachTrainInvalidToken() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
+        CoachTypeEntity eksType = coachTypeRepository.findByName(eksCoachType).orElse(null);        
+
         CoachEntity eksCoach = new CoachEntity();
         eksCoach.setCoachName(eksCoachName);
         eksCoach.setCoachNumber(eksCoachNumber);
-        eksCoach.setCoachType(eksCoachType);
+        eksCoach.setCoachTypeEntity(eksType);
         eksCoach.setIsActive(true);
         eksCoach.setUserEntity(user);
         coachRepository.save(eksCoach);
@@ -2138,10 +2148,12 @@ public class TrainControllerTest {
     void testAssignCoachTrainTokenExpired() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
+        CoachTypeEntity eksType = coachTypeRepository.findByName(eksCoachType).orElse(null);        
+
         CoachEntity eksCoach = new CoachEntity();
         eksCoach.setCoachName(eksCoachName);
         eksCoach.setCoachNumber(eksCoachNumber);
-        eksCoach.setCoachType(eksCoachType);
+        eksCoach.setCoachTypeEntity(eksType);
         eksCoach.setIsActive(true);
         eksCoach.setUserEntity(user);
         coachRepository.save(eksCoach);
@@ -2187,10 +2199,12 @@ public class TrainControllerTest {
     void testAssignCoachTrainNoToken() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
+        CoachTypeEntity eksType = coachTypeRepository.findByName(eksCoachType).orElse(null);       
+
         CoachEntity eksCoach = new CoachEntity();
         eksCoach.setCoachName(eksCoachName);
         eksCoach.setCoachNumber(eksCoachNumber);
-        eksCoach.setCoachType(eksCoachType);
+        eksCoach.setCoachTypeEntity(eksType);
         eksCoach.setIsActive(true);
         eksCoach.setUserEntity(user);
         coachRepository.save(eksCoach);
@@ -2238,10 +2252,12 @@ public class TrainControllerTest {
         user.setRoles(Collections.singletonList(role));          
         userRepository.save(user);
 
+        CoachTypeEntity eksType = coachTypeRepository.findByName(eksCoachType).orElse(null);        
+
         CoachEntity eksCoach = new CoachEntity();
         eksCoach.setCoachName(eksCoachName);
         eksCoach.setCoachNumber(eksCoachNumber);
-        eksCoach.setCoachType(eksCoachType);
+        eksCoach.setCoachTypeEntity(eksType);
         eksCoach.setIsActive(true);
         eksCoach.setUserEntity(user);
         coachRepository.save(eksCoach);
@@ -2287,18 +2303,21 @@ public class TrainControllerTest {
     void testRemoveCoachTrainSuccess() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
+        CoachTypeEntity eksType = coachTypeRepository.findByName(eksCoachType).orElse(null);
+        CoachTypeEntity panType = coachTypeRepository.findByName(panCoachType).orElse(null);        
+
         CoachEntity eksCoach = new CoachEntity();
         eksCoach.setCoachName(eksCoachName);
         eksCoach.setCoachNumber(eksCoachNumber);
-        eksCoach.setCoachType(eksCoachType);
+        eksCoach.setCoachTypeEntity(eksType);
         eksCoach.setIsActive(true);
         eksCoach.setUserEntity(user);
-        coachRepository.save(eksCoach);
+        coachRepository.save(eksCoach);   
 
         CoachEntity panCoach = new CoachEntity();
         panCoach.setCoachName(panCoachName);
         panCoach.setCoachNumber(panCoachNumber);
-        panCoach.setCoachType(panCoachType);
+        panCoach.setCoachTypeEntity(panType);
         panCoach.setIsActive(true);
         panCoach.setUserEntity(user);
         coachRepository.save(panCoach);
@@ -2372,10 +2391,12 @@ public class TrainControllerTest {
     void testRemoveCoachTrainInvalidToken() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
+        CoachTypeEntity eksType = coachTypeRepository.findByName(eksCoachType).orElse(null);        
+
         CoachEntity eksCoach = new CoachEntity();
         eksCoach.setCoachName(eksCoachName);
         eksCoach.setCoachNumber(eksCoachNumber);
-        eksCoach.setCoachType(eksCoachType);
+        eksCoach.setCoachTypeEntity(eksType);
         eksCoach.setIsActive(true);
         eksCoach.setUserEntity(user);
         coachRepository.save(eksCoach);        
@@ -2423,10 +2444,12 @@ public class TrainControllerTest {
     void testRemoveCoachTrainTokenExpired() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
+        CoachTypeEntity eksType = coachTypeRepository.findByName(eksCoachType).orElse(null);        
+
         CoachEntity eksCoach = new CoachEntity();
         eksCoach.setCoachName(eksCoachName);
         eksCoach.setCoachNumber(eksCoachNumber);
-        eksCoach.setCoachType(eksCoachType);
+        eksCoach.setCoachTypeEntity(eksType);
         eksCoach.setIsActive(true);
         eksCoach.setUserEntity(user);
         coachRepository.save(eksCoach);        
@@ -2474,13 +2497,15 @@ public class TrainControllerTest {
     void testRemoveCoachTrainNoToken() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
+        CoachTypeEntity eksType = coachTypeRepository.findByName(eksCoachType).orElse(null);        
+
         CoachEntity eksCoach = new CoachEntity();
         eksCoach.setCoachName(eksCoachName);
         eksCoach.setCoachNumber(eksCoachNumber);
-        eksCoach.setCoachType(eksCoachType);
+        eksCoach.setCoachTypeEntity(eksType);
         eksCoach.setIsActive(true);
         eksCoach.setUserEntity(user);
-        coachRepository.save(eksCoach);        
+        coachRepository.save(eksCoach);       
 
         TrainEntity train = new TrainEntity();
         train.setName(trainName);
@@ -2527,10 +2552,12 @@ public class TrainControllerTest {
         user.setRoles(Collections.singletonList(role));          
         userRepository.save(user);
 
+        CoachTypeEntity eksType = coachTypeRepository.findByName(eksCoachType).orElse(null);        
+
         CoachEntity eksCoach = new CoachEntity();
         eksCoach.setCoachName(eksCoachName);
         eksCoach.setCoachNumber(eksCoachNumber);
-        eksCoach.setCoachType(eksCoachType);
+        eksCoach.setCoachTypeEntity(eksType);
         eksCoach.setIsActive(true);
         eksCoach.setUserEntity(user);
         coachRepository.save(eksCoach);        
