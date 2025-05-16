@@ -1,7 +1,7 @@
 package restful.api.eztrain.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -24,6 +24,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import restful.api.eztrain.entity.CoachEntity;
 import restful.api.eztrain.entity.RoleEntity;
 import restful.api.eztrain.entity.TrainEntity;
 import restful.api.eztrain.entity.UserEntity;
@@ -31,6 +32,7 @@ import restful.api.eztrain.model.RegisterTrainRequest;
 import restful.api.eztrain.model.TrainResponse;
 import restful.api.eztrain.model.UpdateTrainRequest;
 import restful.api.eztrain.model.WebResponse;
+import restful.api.eztrain.repository.CoachRepository;
 import restful.api.eztrain.repository.RoleRepository;
 import restful.api.eztrain.repository.TrainRepository;
 import restful.api.eztrain.repository.UserRepository;
@@ -55,6 +57,9 @@ public class TrainControllerTest {
     private TrainRepository trainRepository;
 
     @Autowired
+    private CoachRepository coachRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -73,10 +78,19 @@ public class TrainControllerTest {
     private final String trainType = "Argo";
     private final String trainOperator = "KAI";
 
+    private final String eksCoachName = "Eksekutif 1";
+    private final Integer eksCoachNumber = 1;
+    private final String eksCoachType = "Eksekutif";
+
+    private final String panCoachName = "Panomaric 1";
+    private final Integer panCoachNumber = 1;
+    private final String panCoachType = "Panomaric";
+
     @BeforeEach
     void setUp() {                
 
         trainRepository.deleteAll();
+        coachRepository.deleteAll();
         userRepository.deleteAll();
 
         RoleEntity role = roleRepository.findByName("ROLE_ADMIN").orElse(null);
@@ -1990,5 +2004,573 @@ public class TrainControllerTest {
 
             assertEquals(false, response.getStatus());
         });        
+    }
+
+    @Test
+    void testAssignCoachTrainSuccess() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CoachEntity eksCoach = new CoachEntity();
+        eksCoach.setCoachName(eksCoachName);
+        eksCoach.setCoachNumber(eksCoachNumber);
+        eksCoach.setCoachType(eksCoachType);
+        eksCoach.setIsActive(true);
+        eksCoach.setUserEntity(user);
+        coachRepository.save(eksCoach);
+
+        CoachEntity panCoach = new CoachEntity();
+        panCoach.setCoachName(panCoachName);
+        panCoach.setCoachNumber(panCoachNumber);
+        panCoach.setCoachType(panCoachType);
+        panCoach.setIsActive(true);
+        panCoach.setUserEntity(user);
+        coachRepository.save(panCoach);
+
+        TrainEntity train = new TrainEntity();
+        train.setName(trainName);
+        train.setTrainType(trainType);
+        train.setOperator(trainOperator);
+        train.setIsActive(true);
+        train.setUserEntity(user);
+        trainRepository.save(train);       
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                post("/api/trains/" + train.getId() + "/coaches/" + eksCoach.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+                WebResponse<TrainResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(true, response.getStatus());
+            assertEquals(train.getId(), response.getData().getId());
+            assertEquals(train.getName(), response.getData().getName());            
+            assertEquals(train.getTrainType(), response.getData().getTrainType());
+            assertEquals(train.getOperator(), response.getData().getOperator());
+            assertNotEquals(0, response.getData().getCoach().size());
+        });
+
+        mockMvc.perform(
+                post("/api/trains/" + train.getId() + "/coaches/" + panCoach.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+                WebResponse<TrainResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(true, response.getStatus());
+            assertEquals(train.getId(), response.getData().getId());
+            assertEquals(train.getName(), response.getData().getName());            
+            assertEquals(train.getTrainType(), response.getData().getTrainType());
+            assertEquals(train.getOperator(), response.getData().getOperator());
+            assertNotEquals(0, response.getData().getCoach().size());
+        });
+    }
+    
+    @Test
+    void testAssignCoachTrainInvalidToken() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CoachEntity eksCoach = new CoachEntity();
+        eksCoach.setCoachName(eksCoachName);
+        eksCoach.setCoachNumber(eksCoachNumber);
+        eksCoach.setCoachType(eksCoachType);
+        eksCoach.setIsActive(true);
+        eksCoach.setUserEntity(user);
+        coachRepository.save(eksCoach);
+
+        TrainEntity train = new TrainEntity();
+        train.setName(trainName);
+        train.setTrainType(trainType);
+        train.setOperator(trainOperator);
+        train.setIsActive(true);
+        train.setUserEntity(user);
+        trainRepository.save(train);       
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken + "a";
+
+        mockMvc.perform(
+                post("/api/trains/" + train.getId() + "/coaches/" + eksCoach.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+                WebResponse<TrainResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });        
+    }
+
+    @Test
+    void testAssignCoachTrainTokenExpired() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CoachEntity eksCoach = new CoachEntity();
+        eksCoach.setCoachName(eksCoachName);
+        eksCoach.setCoachNumber(eksCoachNumber);
+        eksCoach.setCoachType(eksCoachType);
+        eksCoach.setIsActive(true);
+        eksCoach.setUserEntity(user);
+        coachRepository.save(eksCoach);
+
+        TrainEntity train = new TrainEntity();
+        train.setName(trainName);
+        train.setTrainType(trainType);
+        train.setOperator(trainOperator);
+        train.setIsActive(true);
+        train.setUserEntity(user);
+        trainRepository.save(train);       
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() - SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                post("/api/trains/" + train.getId() + "/coaches/" + eksCoach.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+                WebResponse<TrainResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });
+
+    }
+
+    @Test
+    void testAssignCoachTrainNoToken() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CoachEntity eksCoach = new CoachEntity();
+        eksCoach.setCoachName(eksCoachName);
+        eksCoach.setCoachNumber(eksCoachNumber);
+        eksCoach.setCoachType(eksCoachType);
+        eksCoach.setIsActive(true);
+        eksCoach.setUserEntity(user);
+        coachRepository.save(eksCoach);
+
+        TrainEntity train = new TrainEntity();
+        train.setName(trainName);
+        train.setTrainType(trainType);
+        train.setOperator(trainOperator);
+        train.setIsActive(true);
+        train.setUserEntity(user);
+        trainRepository.save(train);       
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);        
+
+        mockMvc.perform(
+                post("/api/trains/" + train.getId() + "/coaches/" + eksCoach.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                                                                       
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+                WebResponse<TrainResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });
+
+    }
+
+    @Test
+    void testAssignCoachTrainBadRole() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        RoleEntity role = roleRepository.findByName("ROLE_USER").orElse(null);
+        
+        user.setRoles(Collections.singletonList(role));          
+        userRepository.save(user);
+
+        CoachEntity eksCoach = new CoachEntity();
+        eksCoach.setCoachName(eksCoachName);
+        eksCoach.setCoachNumber(eksCoachNumber);
+        eksCoach.setCoachType(eksCoachType);
+        eksCoach.setIsActive(true);
+        eksCoach.setUserEntity(user);
+        coachRepository.save(eksCoach);
+
+        TrainEntity train = new TrainEntity();
+        train.setName(trainName);
+        train.setTrainType(trainType);
+        train.setOperator(trainOperator);
+        train.setIsActive(true);
+        train.setUserEntity(user);
+        trainRepository.save(train);       
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                post("/api/trains/" + train.getId() + "/coaches/" + eksCoach.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isForbidden()
+        ).andDo(result -> {
+                WebResponse<TrainResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });
+
+    }
+
+    @Test
+    void testRemoveCoachTrainSuccess() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CoachEntity eksCoach = new CoachEntity();
+        eksCoach.setCoachName(eksCoachName);
+        eksCoach.setCoachNumber(eksCoachNumber);
+        eksCoach.setCoachType(eksCoachType);
+        eksCoach.setIsActive(true);
+        eksCoach.setUserEntity(user);
+        coachRepository.save(eksCoach);
+
+        CoachEntity panCoach = new CoachEntity();
+        panCoach.setCoachName(panCoachName);
+        panCoach.setCoachNumber(panCoachNumber);
+        panCoach.setCoachType(panCoachType);
+        panCoach.setIsActive(true);
+        panCoach.setUserEntity(user);
+        coachRepository.save(panCoach);
+
+        TrainEntity train = new TrainEntity();
+        train.setName(trainName);
+        train.setTrainType(trainType);
+        train.setOperator(trainOperator);
+        train.setIsActive(true);
+        train.setUserEntity(user);        
+        trainRepository.save(train);
+        
+        train.getCoaches().add(eksCoach);        
+        train.getCoaches().add(panCoach);
+        trainRepository.save(train);
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+        
+        mockMvc.perform(
+                delete("/api/trains/" + train.getId() + "/coaches/" + eksCoach.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+                WebResponse<TrainResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(true, response.getStatus());
+            assertEquals(train.getId(), response.getData().getId());
+            assertEquals(train.getName(), response.getData().getName());            
+            assertEquals(train.getTrainType(), response.getData().getTrainType());
+            assertEquals(train.getOperator(), response.getData().getOperator());
+            assertEquals(1, response.getData().getCoach().size());
+        });        
+        
+        mockMvc.perform(
+                delete("/api/trains/" + train.getId() + "/coaches/" + panCoach.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+                WebResponse<TrainResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(true, response.getStatus());
+            assertEquals(train.getId(), response.getData().getId());
+            assertEquals(train.getName(), response.getData().getName());            
+            assertEquals(train.getTrainType(), response.getData().getTrainType());
+            assertEquals(train.getOperator(), response.getData().getOperator());
+            assertEquals(0, response.getData().getCoach().size());
+        });
+        
+    }
+
+    @Test
+    void testRemoveCoachTrainInvalidToken() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CoachEntity eksCoach = new CoachEntity();
+        eksCoach.setCoachName(eksCoachName);
+        eksCoach.setCoachNumber(eksCoachNumber);
+        eksCoach.setCoachType(eksCoachType);
+        eksCoach.setIsActive(true);
+        eksCoach.setUserEntity(user);
+        coachRepository.save(eksCoach);        
+
+        TrainEntity train = new TrainEntity();
+        train.setName(trainName);
+        train.setTrainType(trainType);
+        train.setOperator(trainOperator);
+        train.setIsActive(true);
+        train.setUserEntity(user);        
+        trainRepository.save(train);
+        
+        train.getCoaches().add(eksCoach);                
+        trainRepository.save(train);
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken + "a";
+        
+        mockMvc.perform(
+                delete("/api/trains/" + train.getId() + "/coaches/" + eksCoach.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+                WebResponse<TrainResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });                            
+    }
+
+    @Test
+    void testRemoveCoachTrainTokenExpired() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CoachEntity eksCoach = new CoachEntity();
+        eksCoach.setCoachName(eksCoachName);
+        eksCoach.setCoachNumber(eksCoachNumber);
+        eksCoach.setCoachType(eksCoachType);
+        eksCoach.setIsActive(true);
+        eksCoach.setUserEntity(user);
+        coachRepository.save(eksCoach);        
+
+        TrainEntity train = new TrainEntity();
+        train.setName(trainName);
+        train.setTrainType(trainType);
+        train.setOperator(trainOperator);
+        train.setIsActive(true);
+        train.setUserEntity(user);        
+        trainRepository.save(train);
+        
+        train.getCoaches().add(eksCoach);                
+        trainRepository.save(train);
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() - SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+        
+        mockMvc.perform(
+                delete("/api/trains/" + train.getId() + "/coaches/" + eksCoach.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+                WebResponse<TrainResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });                            
+    }
+
+    @Test
+    void testRemoveCoachTrainNoToken() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CoachEntity eksCoach = new CoachEntity();
+        eksCoach.setCoachName(eksCoachName);
+        eksCoach.setCoachNumber(eksCoachNumber);
+        eksCoach.setCoachType(eksCoachType);
+        eksCoach.setIsActive(true);
+        eksCoach.setUserEntity(user);
+        coachRepository.save(eksCoach);        
+
+        TrainEntity train = new TrainEntity();
+        train.setName(trainName);
+        train.setTrainType(trainType);
+        train.setOperator(trainOperator);
+        train.setIsActive(true);
+        train.setUserEntity(user);        
+        trainRepository.save(train);
+        
+        train.getCoaches().add(eksCoach);                
+        trainRepository.save(train);
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+        
+        mockMvc.perform(
+                delete("/api/trains/" + train.getId() + "/coaches/" + eksCoach.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                                                                     
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+                WebResponse<TrainResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });                            
+    }
+
+    @Test
+    void testRemoveCoachTrainBadRole() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        RoleEntity role = roleRepository.findByName("ROLE_USER").orElse(null);
+        
+        user.setRoles(Collections.singletonList(role));          
+        userRepository.save(user);
+
+        CoachEntity eksCoach = new CoachEntity();
+        eksCoach.setCoachName(eksCoachName);
+        eksCoach.setCoachNumber(eksCoachNumber);
+        eksCoach.setCoachType(eksCoachType);
+        eksCoach.setIsActive(true);
+        eksCoach.setUserEntity(user);
+        coachRepository.save(eksCoach);        
+
+        TrainEntity train = new TrainEntity();
+        train.setName(trainName);
+        train.setTrainType(trainType);
+        train.setOperator(trainOperator);
+        train.setIsActive(true);
+        train.setUserEntity(user);        
+        trainRepository.save(train);
+        
+        train.getCoaches().add(eksCoach);                
+        trainRepository.save(train);
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+        
+        mockMvc.perform(
+                delete("/api/trains/" + train.getId() + "/coaches/" + eksCoach.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isForbidden()
+        ).andDo(result -> {
+                WebResponse<TrainResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });                            
     }
 }

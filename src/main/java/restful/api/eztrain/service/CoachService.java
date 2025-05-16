@@ -19,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.persistence.criteria.Predicate;
 import restful.api.eztrain.entity.CoachEntity;
+import restful.api.eztrain.entity.SeatEntity;
 import restful.api.eztrain.entity.UserEntity;
 import restful.api.eztrain.mapper.ResponseMapper;
 import restful.api.eztrain.model.CoachResponse;
@@ -26,6 +27,7 @@ import restful.api.eztrain.model.RegisterCoachRequest;
 import restful.api.eztrain.model.SearchCoachRequest;
 import restful.api.eztrain.model.UpdateCoachRequest;
 import restful.api.eztrain.repository.CoachRepository;
+import restful.api.eztrain.repository.SeatRepository;
 import restful.api.eztrain.repository.UserRepository;
 
 @Service
@@ -36,6 +38,9 @@ public class CoachService {
 
     @Autowired
     private CoachRepository coachRepository;
+
+    @Autowired
+    private SeatRepository seatRepository;
 
     @Autowired
     private ValidationService validationService;
@@ -55,6 +60,7 @@ public class CoachService {
         coach.setCoachName(request.getCoachName());
         coach.setCoachNumber(request.getCoachNumber());
         coach.setCoachType(request.getCoachType());
+        coach.setIsActive(true);
         coach.setUserEntity(user);
 
         try {
@@ -186,6 +192,35 @@ public class CoachService {
                                                     .collect(Collectors.toList());
 
         return new PageImpl<>(coachResponses, pageable, coaches.getTotalElements());
+    }
+
+    @Transactional
+    public CoachResponse assignSeat(String strCoachId, String strSeatId) {    
+        Long coachId;
+        Long seatId;
+
+        try {            
+            coachId = Long.parseLong(strCoachId);
+            seatId = Long.parseLong(strSeatId);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
+        }
+
+        CoachEntity coach = coachRepository.findById(coachId)
+                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Coach not found"));
+
+        SeatEntity seat = seatRepository.findById(seatId)
+                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Seat not found"));
+
+        coach.getSeats().add(seat);
+
+        try {
+            coachRepository.save(coach);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Assigning seat to coach failed");
+        }
+
+        return ResponseMapper.ToCoachResponseMapper(coach);
     }
 
 }

@@ -169,13 +169,32 @@ public class TrainController {
     )
     public WebResponse<TrainResponse> assignCoach(Authentication authentication, 
                                             @PathVariable("trainId") String trainId,
-                                            @PathVariable("coach") String coachId) {        
+                                            @PathVariable("coachId") String coachId) {        
         
         TrainResponse response = trainService.assignCoach(trainId, coachId);
 
         return WebResponse.<TrainResponse>builder()
                                         .status(true)
                                         .messages("Train assigning coach success")
+                                        .data(response)
+                                        .build();      
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @DeleteMapping(
+        path = "/api/trains/{trainId}/coaches/{coachId}",
+        consumes = MediaType.APPLICATION_JSON_VALUE,        
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public WebResponse<TrainResponse> removeCoach(Authentication authentication, 
+                                            @PathVariable("trainId") String trainId,
+                                            @PathVariable("coachId") String coachId) {        
+        
+        TrainResponse response = trainService.removeCoach(trainId, coachId);
+
+        return WebResponse.<TrainResponse>builder()
+                                        .status(true)
+                                        .messages("Train removing coach success")
                                         .data(response)
                                         .build();      
     }

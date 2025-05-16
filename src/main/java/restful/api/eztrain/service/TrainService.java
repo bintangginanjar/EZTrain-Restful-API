@@ -232,4 +232,26 @@ public class TrainService {
         return ResponseMapper.ToTrainResponseMapper(train);
     }
 
+    @Transactional
+    public TrainResponse removeCoach(String strTrainId, String strCoachId) {
+        Long trainId;
+        Long coachId;
+
+        try {
+            trainId = Long.parseLong(strTrainId);
+            coachId = Long.parseLong(strCoachId);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
+        }
+                
+        TrainEntity train = trainRepository.findById(trainId)
+                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Train not found"));
+
+        CoachEntity coach = coachRepository.findById(coachId)
+                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Coach not found"));             
+        
+        train.getCoaches().remove(coach);        
+
+        return ResponseMapper.ToTrainResponseMapper(train);
+    }
 }

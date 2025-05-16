@@ -1,5 +1,6 @@
 package restful.api.eztrain.entity;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -9,7 +10,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -59,13 +59,14 @@ public class TrainEntity {
     @OneToMany(mappedBy = "trainEntity", cascade = CascadeType.ALL)
     private List<TicketEntity> tickets;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @Builder.Default
+    @ManyToMany
     @JoinTable(
         name = "trains_coaches",
         joinColumns = @JoinColumn(name = "train_id", referencedColumnName = "id"),
         inverseJoinColumns = @JoinColumn(name = "coach_id", referencedColumnName = "id")
     )
-    private List<CoachEntity> coaches;
+    private List<CoachEntity> coaches = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false, referencedColumnName = "id")
