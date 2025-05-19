@@ -189,9 +189,11 @@ public class CoachService {
         Specification<CoachEntity> specification = (root, query, builder) -> {
             List<Predicate> predicates = new ArrayList<>();            
             
+            CoachTypeEntity coachType = coachTypeRepository.findByName(request.getCoachType()).orElse(null);
+
             if (Objects.nonNull(request.getCoachType())) {
                 predicates.add(builder.or(                    
-                    builder.like(root.get("coachType"), "%"+request.getCoachType()+"%")
+                    builder.like(root.get("coachTypeEntity"), "%"+coachType+"%")
                 ));
             }
 
@@ -205,7 +207,7 @@ public class CoachService {
         };
 
         Pageable pageable = PageRequest.of(request.getPage(), request.getSize());
-        Page<CoachEntity> coaches = coachRepository.findAll(specification, pageable);
+        Page<CoachEntity> coaches = coachRepository.findAll(specification, pageable);        
         List<CoachResponse> coachResponses = coaches
                                                     .getContent()
                                                     .stream()
@@ -240,6 +242,29 @@ public class CoachService {
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Assigning seat to coach failed");
         }
+
+        return ResponseMapper.ToCoachResponseMapper(coach);
+    }
+
+    @Transactional
+    public CoachResponse removeSeat(String strCoachId, String strSeatId) {
+        Long coachId;
+        Long seatId;
+
+        try {            
+            coachId = Long.parseLong(strCoachId);
+            seatId = Long.parseLong(strSeatId);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
+        }
+
+        CoachEntity coach = coachRepository.findById(coachId)
+                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Coach not found"));
+
+        SeatEntity seat = seatRepository.findById(seatId)
+                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Seat not found"));
+
+        coach.getSeats().remove(seat);
 
         return ResponseMapper.ToCoachResponseMapper(coach);
     }
