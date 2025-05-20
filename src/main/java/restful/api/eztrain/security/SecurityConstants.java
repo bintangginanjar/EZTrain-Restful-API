@@ -1,9 +1,17 @@
 package restful.api.eztrain.security;
 
+import org.springframework.beans.factory.annotation.Value;
+
 public class SecurityConstants {
 
-    public static final int JWTexpiration = 3600000;
+    @Value("${jwt.expiration}")
+    private static Integer jwtExpiration;
 
-    public static final String JWTsecret = "Th3k0p4tspringboot";
+    @Value("${jwt.secret}")
+    private static String jwtSecret;
+
+    public static final Integer JWTexpiration = jwtExpiration;      
+
+    public static final String JWTsecret = jwtSecret;    
 
 }
