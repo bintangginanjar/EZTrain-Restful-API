@@ -126,7 +126,7 @@ public class CoachService {
 
         try {        
             coachId = Long.parseLong(strCoachId);
-            coachTypeId = Long.parseLong(request.getCoachType());
+            coachTypeId = Long.parseLong(request.getCoachTypeId());
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
         }
@@ -144,7 +144,7 @@ public class CoachService {
             coach.setCoachName(request.getCoachName());
         }
         
-        if (Objects.nonNull(request.getCoachType())) {
+        if (Objects.nonNull(request.getCoachTypeId())) {
             coach.setCoachTypeEntity(coachType);
         }
         

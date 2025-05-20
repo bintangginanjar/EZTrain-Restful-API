@@ -22,6 +22,6 @@ public class UpdateCoachRequest {
 
     private Integer coachNumber;
     
-    private String coachType;
+    private String coachTypeId;
 
 }

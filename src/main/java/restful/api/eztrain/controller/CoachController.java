@@ -79,7 +79,7 @@ public class CoachController {
 
         request.setId(coachId);
         
-        CoachResponse response = coachService.get(authentication, coachId);
+        CoachResponse response = coachService.update(authentication, request, coachId);
 
         return WebResponse.<CoachResponse>builder()
                                         .status(true)

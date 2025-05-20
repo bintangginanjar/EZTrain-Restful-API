@@ -1,13 +1,9 @@
 package restful.api.eztrain.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 import java.util.Collections;
-import java.util.List;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,12 +23,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import restful.api.eztrain.entity.CoachEntity;
 import restful.api.eztrain.entity.CoachTypeEntity;
 import restful.api.eztrain.entity.RoleEntity;
-import restful.api.eztrain.entity.TrainEntity;
 import restful.api.eztrain.entity.UserEntity;
 import restful.api.eztrain.model.CoachResponse;
 import restful.api.eztrain.model.RegisterCoachRequest;
-import restful.api.eztrain.model.RegisterTrainRequest;
-import restful.api.eztrain.model.TrainResponse;
+import restful.api.eztrain.model.UpdateCoachRequest;
 import restful.api.eztrain.model.WebResponse;
 import restful.api.eztrain.repository.CoachRepository;
 import restful.api.eztrain.repository.CoachTypeRepository;
@@ -154,6 +148,53 @@ public class CoachControllerTest {
             assertEquals(request.getCoachNumber(), response.getData().getCoachNumber());
             assertEquals(request.getCoachTypeId(), Long.toString(response.getData().getCoachTypeId()));
             assertEquals(coachType.getName(), response.getData().getCoachTypeName());
+        });
+    }
+
+    @Test
+    void testRegisterCoachDuplicate() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
+
+        CoachEntity coach = new CoachEntity();
+        coach.setCoachName(eksCoachName);
+        coach.setCoachNumber(eksCoachNumber);
+        coach.setCoachTypeEntity(coachType);
+        coach.setIsActive(true);
+        coach.setUserEntity(user);
+        coachRepository.save(coach);
+
+        RegisterCoachRequest request = new RegisterCoachRequest();
+        request.setCoachName(eksCoachName);
+        request.setCoachTypeId(Long.toString(coachType.getId()));
+        request.setCoachNumber(eksCoachNumber);               
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + securityConstants.getJwtExpiration());
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                post("/api/coaches")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isBadRequest()
+        ).andDo(result -> {
+                WebResponse<CoachResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
         });
     }
 
@@ -644,6 +685,405 @@ public class CoachControllerTest {
                 get("/api/coaches/" + coach.getId())
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isForbidden()
+        ).andDo(result -> {
+                WebResponse<CoachResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });
+    }
+
+    @Test
+    void testUpdateCoachSuccess() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
+
+        CoachEntity coach = new CoachEntity();
+        coach.setCoachName(eksCoachName);
+        coach.setCoachNumber(eksCoachNumber);
+        coach.setCoachTypeEntity(coachType);
+        coach.setIsActive(true);
+        coach.setUserEntity(user);
+        coachRepository.save(coach);
+
+        UpdateCoachRequest request = new UpdateCoachRequest();
+        request.setCoachName(eksCoachName + " updated");
+        request.setCoachTypeId(Long.toString(coachType.getId()));
+        request.setCoachNumber(eksCoachNumber + 10);   
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + securityConstants.getJwtExpiration());
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                patch("/api/coaches/" + coach.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+                WebResponse<CoachResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(true, response.getStatus());
+            assertEquals(request.getCoachName(), response.getData().getCoachName());
+            assertEquals(request.getCoachNumber(), response.getData().getCoachNumber());
+            assertEquals(request.getCoachTypeId(), Long.toString(response.getData().getCoachTypeId()));
+            assertEquals(coachType.getName(), response.getData().getCoachTypeName());
+        });
+    }
+
+    @Test
+    void testUpdateCoachDuplicate() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CoachTypeEntity eksekutifCoach = coachTypeRepository.findByName(eksCoachType).orElse(null);
+        CoachTypeEntity panoramicCoach = coachTypeRepository.findByName(panCoachType).orElse(null);
+
+        CoachEntity eksCoach = new CoachEntity();
+        eksCoach.setCoachName(eksCoachName);
+        eksCoach.setCoachNumber(eksCoachNumber);
+        eksCoach.setCoachTypeEntity(eksekutifCoach);
+        eksCoach.setIsActive(true);
+        eksCoach.setUserEntity(user);
+        coachRepository.save(eksCoach);
+
+        CoachEntity panCoach = new CoachEntity();
+        panCoach.setCoachName(panCoachName);
+        panCoach.setCoachNumber(panCoachNumber);
+        panCoach.setCoachTypeEntity(panoramicCoach);
+        panCoach.setIsActive(true);
+        panCoach.setUserEntity(user);
+        coachRepository.save(panCoach);
+
+        UpdateCoachRequest request = new UpdateCoachRequest();
+        request.setCoachName(panCoachName);
+        request.setCoachTypeId(Long.toString(panoramicCoach.getId()));
+        request.setCoachNumber(eksCoachNumber + 10);   
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + securityConstants.getJwtExpiration());
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                patch("/api/coaches/" + eksCoach.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isBadRequest()
+        ).andDo(result -> {
+                WebResponse<CoachResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });
+    }
+
+    @Test
+    void testUpdateCoachBadId() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
+
+        CoachEntity coach = new CoachEntity();
+        coach.setCoachName(eksCoachName);
+        coach.setCoachNumber(eksCoachNumber);
+        coach.setCoachTypeEntity(coachType);
+        coach.setIsActive(true);
+        coach.setUserEntity(user);
+        coachRepository.save(coach);
+
+        UpdateCoachRequest request = new UpdateCoachRequest();
+        request.setCoachName(eksCoachName + " updated");
+        request.setCoachTypeId(Long.toString(coachType.getId()));
+        request.setCoachNumber(eksCoachNumber + 10);   
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + securityConstants.getJwtExpiration());
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                patch("/api/coaches/" + coach.getId() + "a")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isBadRequest()
+        ).andDo(result -> {
+                WebResponse<CoachResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });
+    }
+
+    @Test
+    void testUpdateCoachNotFound() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
+
+        CoachEntity coach = new CoachEntity();
+        coach.setCoachName(eksCoachName);
+        coach.setCoachNumber(eksCoachNumber);
+        coach.setCoachTypeEntity(coachType);
+        coach.setIsActive(true);
+        coach.setUserEntity(user);
+        coachRepository.save(coach);
+
+        UpdateCoachRequest request = new UpdateCoachRequest();
+        request.setCoachName(eksCoachName + " updated");
+        request.setCoachTypeId(Long.toString(coachType.getId()));
+        request.setCoachNumber(eksCoachNumber + 10);   
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + securityConstants.getJwtExpiration());
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                patch("/api/coaches/111111")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isNotFound()
+        ).andDo(result -> {
+                WebResponse<CoachResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });
+    }
+
+    @Test
+    void testUpdateCoachInvalidToken() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
+
+        CoachEntity coach = new CoachEntity();
+        coach.setCoachName(eksCoachName);
+        coach.setCoachNumber(eksCoachNumber);
+        coach.setCoachTypeEntity(coachType);
+        coach.setIsActive(true);
+        coach.setUserEntity(user);
+        coachRepository.save(coach);
+
+        UpdateCoachRequest request = new UpdateCoachRequest();
+        request.setCoachName(eksCoachName + " updated");
+        request.setCoachTypeId(Long.toString(coachType.getId()));
+        request.setCoachNumber(eksCoachNumber + 10);   
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + securityConstants.getJwtExpiration());
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken + "a";
+
+        mockMvc.perform(
+                patch("/api/coaches/" + coach.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+                WebResponse<CoachResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });
+    }
+
+    @Test
+    void testUpdateCoachTokenExpired() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
+
+        CoachEntity coach = new CoachEntity();
+        coach.setCoachName(eksCoachName);
+        coach.setCoachNumber(eksCoachNumber);
+        coach.setCoachTypeEntity(coachType);
+        coach.setIsActive(true);
+        coach.setUserEntity(user);
+        coachRepository.save(coach);
+
+        UpdateCoachRequest request = new UpdateCoachRequest();
+        request.setCoachName(eksCoachName + " updated");
+        request.setCoachTypeId(Long.toString(coachType.getId()));
+        request.setCoachNumber(eksCoachNumber + 10);   
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() - securityConstants.getJwtExpiration());
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                patch("/api/coaches/" + coach.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+                WebResponse<CoachResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });
+    }
+
+    @Test
+    void testUpdateCoachNoToken() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
+
+        CoachEntity coach = new CoachEntity();
+        coach.setCoachName(eksCoachName);
+        coach.setCoachNumber(eksCoachNumber);
+        coach.setCoachTypeEntity(coachType);
+        coach.setIsActive(true);
+        coach.setUserEntity(user);
+        coachRepository.save(coach);
+
+        UpdateCoachRequest request = new UpdateCoachRequest();
+        request.setCoachName(eksCoachName + " updated");
+        request.setCoachTypeId(Long.toString(coachType.getId()));
+        request.setCoachNumber(eksCoachNumber + 10);   
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + securityConstants.getJwtExpiration());
+        userRepository.save(user);        
+
+        mockMvc.perform(
+                patch("/api/coaches/" + coach.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))                                        
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+                WebResponse<CoachResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });
+    }
+
+    @Test
+    void testUpdateCoachBadRole() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        RoleEntity role = roleRepository.findByName("ROLE_USER").orElse(null);
+        
+        user.setRoles(Collections.singletonList(role));          
+        userRepository.save(user);
+
+        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
+
+        CoachEntity coach = new CoachEntity();
+        coach.setCoachName(eksCoachName);
+        coach.setCoachNumber(eksCoachNumber);
+        coach.setCoachTypeEntity(coachType);
+        coach.setIsActive(true);
+        coach.setUserEntity(user);
+        coachRepository.save(coach);
+
+        UpdateCoachRequest request = new UpdateCoachRequest();
+        request.setCoachName(eksCoachName + " updated");
+        request.setCoachTypeId(Long.toString(coachType.getId()));
+        request.setCoachNumber(eksCoachNumber + 10);   
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + securityConstants.getJwtExpiration());
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                patch("/api/coaches/" + coach.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
                         .header("Authorization", mockBearerToken)                        
         ).andExpectAll(
                 status().isForbidden()
