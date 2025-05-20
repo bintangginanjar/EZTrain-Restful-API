@@ -51,6 +51,9 @@ public class AuthService {
     private JwtUtil jwtUtil;
 
     @Autowired
+    private SecurityConstants securityConstants;
+
+    @Autowired
     ValidationService validationService;
 
     public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder,
@@ -83,7 +86,9 @@ public class AuthService {
             String token = jwtUtil.generateToken(authentication);
 
             user.setToken(token);
-            user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+            user.setTokenExpiredAt(System.currentTimeMillis() + securityConstants.getJwtExpiration());
+            //user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+            
             userRepository.save(user);
             
             return ResponseMapper.ToTokenResponseMapper(user, token, roles);
@@ -102,7 +107,8 @@ public class AuthService {
         String token = UUID.randomUUID().toString();
 
         user.setToken(token);
-        user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
+        user.setTokenExpiredAt(System.currentTimeMillis() + securityConstants.getJwtExpiration());
+        //user.setTokenExpiredAt(System.currentTimeMillis() + SecurityConstants.JWTexpiration);
 
         try {
             userRepository.save(user);

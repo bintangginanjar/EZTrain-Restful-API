@@ -20,6 +20,6 @@ public class RegisterCoachRequest {
     private Integer coachNumber;
     
     @NotBlank
-    private String coachType;
+    private String coachTypeId;    
 
 }

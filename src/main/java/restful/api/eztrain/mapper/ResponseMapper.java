@@ -109,9 +109,12 @@ public class ResponseMapper {
     }
 
     public static CoachResponse ToCoachResponseMapper(CoachEntity coach) {
-        return CoachResponse.builder()                
+        return CoachResponse.builder()
+                .id(coach.getId())
+                .coachName(coach.getCoachName())
                 .coachNumber(coach.getCoachNumber())
-                .coachType(coach.getCoachTypeEntity().getName())
+                .coachTypeId(coach.getCoachTypeEntity().getId())
+                .coachTypeName(coach.getCoachTypeEntity().getName())
                 .build();
     }
 }

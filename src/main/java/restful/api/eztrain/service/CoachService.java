@@ -64,7 +64,7 @@ public class CoachService {
         Long coachTypeId;
 
         try {        
-            coachTypeId = Long.parseLong(request.getCoachType());
+            coachTypeId = Long.parseLong(request.getCoachTypeId());
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
         }

@@ -17,6 +17,8 @@ public class CoachResponse {
 
     private Integer coachNumber;
     
-    private String coachType;
+    private Long coachTypeId;
+
+    private String coachTypeName;
 
 }
