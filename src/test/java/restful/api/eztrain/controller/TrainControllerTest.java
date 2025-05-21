@@ -2074,7 +2074,7 @@ public class TrainControllerTest {
             assertEquals(train.getName(), response.getData().getName());            
             assertEquals(train.getTrainType(), response.getData().getTrainType());
             assertEquals(train.getOperator(), response.getData().getOperator());
-            assertNotEquals(0, response.getData().getCoach().size());
+            assertNotEquals(0, response.getData().getCoaches().size());
         });
 
         mockMvc.perform(
@@ -2093,7 +2093,7 @@ public class TrainControllerTest {
             assertEquals(train.getName(), response.getData().getName());            
             assertEquals(train.getTrainType(), response.getData().getTrainType());
             assertEquals(train.getOperator(), response.getData().getOperator());
-            assertNotEquals(0, response.getData().getCoach().size());
+            assertNotEquals(0, response.getData().getCoaches().size());
         });
     }
     
@@ -2366,7 +2366,7 @@ public class TrainControllerTest {
             assertEquals(train.getName(), response.getData().getName());            
             assertEquals(train.getTrainType(), response.getData().getTrainType());
             assertEquals(train.getOperator(), response.getData().getOperator());
-            assertEquals(1, response.getData().getCoach().size());
+            assertEquals(1, response.getData().getCoaches().size());
         });        
         
         mockMvc.perform(
@@ -2385,7 +2385,7 @@ public class TrainControllerTest {
             assertEquals(train.getName(), response.getData().getName());            
             assertEquals(train.getTrainType(), response.getData().getTrainType());
             assertEquals(train.getOperator(), response.getData().getOperator());
-            assertEquals(0, response.getData().getCoach().size());
+            assertEquals(0, response.getData().getCoaches().size());
         });
         
     }

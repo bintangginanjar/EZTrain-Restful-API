@@ -1,6 +1,7 @@
 package restful.api.eztrain.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import java.util.Collections;
@@ -25,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import restful.api.eztrain.entity.CoachEntity;
 import restful.api.eztrain.entity.CoachTypeEntity;
 import restful.api.eztrain.entity.RoleEntity;
+import restful.api.eztrain.entity.SeatEntity;
 import restful.api.eztrain.entity.UserEntity;
 import restful.api.eztrain.model.CoachResponse;
 import restful.api.eztrain.model.RegisterCoachRequest;
@@ -1896,6 +1898,115 @@ public class CoachControllerTest {
             });
 
             assertEquals(false, response.getStatus());
+        });        
+    }
+
+    @Test
+    void testAssignSeatToCoachSuccess() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);        
+
+        CoachEntity coach = new CoachEntity();
+        coach.setCoachName(eksCoachName);
+        coach.setCoachNumber(eksCoachNumber);
+        coach.setCoachTypeEntity(coachType);
+        coach.setIsActive(true);
+        coach.setUserEntity(user);
+        coachRepository.save(coach);
+
+        SeatEntity seat = new SeatEntity();
+        seat.setSeatNumber("11A");
+        seat.setUserEntity(user);
+        seatRepository.save(seat);
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + securityConstants.getJwtExpiration());
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                post("/api/coaches/" + coach.getId() + "/seats/" + seat.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+                WebResponse<CoachResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(true, response.getStatus());
+            assertEquals(coach.getId(), response.getData().getId());            
+            assertEquals(coach.getCoachName(), response.getData().getCoachName());
+            assertEquals(coach.getCoachNumber(), response.getData().getCoachNumber());
+            assertEquals(coachType.getId(), response.getData().getCoachTypeId());
+            assertEquals(coachType.getName(), response.getData().getCoachTypeName());
+            assertNotEquals(0, response.getData().getSeats().size());
+        });        
+    }
+
+    @Test
+    void testRemoveSeatToCoachSuccess() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);        
+
+        CoachEntity coach = new CoachEntity();
+        coach.setCoachName(eksCoachName);
+        coach.setCoachNumber(eksCoachNumber);
+        coach.setCoachTypeEntity(coachType);
+        coach.setIsActive(true);
+        coach.setUserEntity(user);
+        coachRepository.save(coach);
+
+        SeatEntity seat = new SeatEntity();
+        seat.setSeatNumber("11A");
+        seat.setUserEntity(user);
+        seatRepository.save(seat);
+
+        coach.getSeats().add(seat);
+        coachRepository.save(coach);
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + securityConstants.getJwtExpiration());
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                delete("/api/coaches/" + coach.getId() + "/seats/" + seat.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+                WebResponse<CoachResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(true, response.getStatus());
+            assertEquals(coach.getId(), response.getData().getId());            
+            assertEquals(coach.getCoachName(), response.getData().getCoachName());
+            assertEquals(coach.getCoachNumber(), response.getData().getCoachNumber());
+            assertEquals(coachType.getId(), response.getData().getCoachTypeId());
+            assertEquals(coachType.getName(), response.getData().getCoachTypeName());
+            assertEquals(0, response.getData().getSeats().size());
         });        
     }
 }

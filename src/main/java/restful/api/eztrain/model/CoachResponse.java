@@ -1,5 +1,7 @@
 package restful.api.eztrain.model;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,5 +22,7 @@ public class CoachResponse {
     private Long coachTypeId;
 
     private String coachTypeName;
+
+    private List<String> seats;
 
 }

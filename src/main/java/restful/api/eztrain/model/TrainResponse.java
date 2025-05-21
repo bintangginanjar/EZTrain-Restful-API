@@ -23,6 +23,6 @@ public class TrainResponse {
 
     private Boolean isActive;
 
-    private List<String> coach;
+    private List<String> coaches;
 
 }

@@ -91,7 +91,7 @@ public class ResponseMapper {
                 .trainType(train.getTrainType())
                 .operator(train.getOperator())
                 .isActive(train.getIsActive())
-                .coach(coaches)
+                .coaches(coaches)
                 .build();
     }
 
@@ -109,12 +109,15 @@ public class ResponseMapper {
     }
 
     public static CoachResponse ToCoachResponseMapper(CoachEntity coach) {
+        List<String> seats = coach.getSeats().stream().map(p -> p.getSeatNumber()).toList();
+
         return CoachResponse.builder()
                 .id(coach.getId())
                 .coachName(coach.getCoachName())
                 .coachNumber(coach.getCoachNumber())
                 .coachTypeId(coach.getCoachTypeEntity().getId())
                 .coachTypeName(coach.getCoachTypeEntity().getName())
+                .seats(seats)
                 .build();
     }
 }

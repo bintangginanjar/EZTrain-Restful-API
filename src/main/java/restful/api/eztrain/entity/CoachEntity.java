@@ -57,13 +57,14 @@ public class CoachEntity {
     @Column(updatable = true, name = "updated_at")
     private Date updatedAt;
 
+    @Builder.Default
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinTable(
         name = "coaches_seats",
         joinColumns = @JoinColumn(name = "coach_id", referencedColumnName = "id"),
         inverseJoinColumns = @JoinColumn(name = "seat_id", referencedColumnName = "id")
     )
-    private List<SeatEntity> seats;
+    private List<SeatEntity> seats = new ArrayList<>();
 
     @OneToMany(mappedBy = "coachEntity", cascade = CascadeType.ALL)
     private List<TicketEntity> tickets;
