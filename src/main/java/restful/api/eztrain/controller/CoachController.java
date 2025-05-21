@@ -133,16 +133,14 @@ public class CoachController {
         produces = MediaType.APPLICATION_JSON_VALUE
     )
     public WebResponse<List<CoachResponse>> search(Authentication authentication,
-                                                @RequestParam(value = "coachType", required = false) String coachType,
-                                                @RequestParam(value = "coachNumber", required = false) Integer coachNumber,                                                
+                                                @RequestParam(value = "coachName", required = false) String coachName,                                                
                                                 @RequestParam(value = "page", defaultValue = "0") Integer page,
                                                 @RequestParam(value = "size", defaultValue = "10") Integer size) {
 
         SearchCoachRequest request = SearchCoachRequest.builder()
                                         .page(page)
                                         .size(size)                                                                            
-                                        .coachType(coachType)
-                                        .coachNumber(coachNumber)
+                                        .coachName(coachName)                                    
                                         .build();
 
         Page<CoachResponse> response = coachService.search(request);

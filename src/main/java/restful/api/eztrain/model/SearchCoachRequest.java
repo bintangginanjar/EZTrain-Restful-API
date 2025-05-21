@@ -12,9 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class SearchCoachRequest {
 
-    private Integer coachNumber;
-    
-    private String coachType;
+    private String coachName;  
 
     @NotNull
     private Integer page;

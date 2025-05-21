@@ -187,19 +187,11 @@ public class CoachService {
     @Transactional(readOnly = true)
     public Page<CoachResponse> search(SearchCoachRequest request) {
         Specification<CoachEntity> specification = (root, query, builder) -> {
-            List<Predicate> predicates = new ArrayList<>();            
-            
-            CoachTypeEntity coachType = coachTypeRepository.findByName(request.getCoachType()).orElse(null);
+            List<Predicate> predicates = new ArrayList<>();                    
 
-            if (Objects.nonNull(request.getCoachType())) {
+            if (Objects.nonNull(request.getCoachName())) {
                 predicates.add(builder.or(                    
-                    builder.like(root.get("coachTypeEntity"), "%"+coachType+"%")
-                ));
-            }
-
-            if (Objects.nonNull(request.getCoachNumber())) {
-                predicates.add(builder.or(                    
-                    builder.like(root.get("coachNumber"), "%"+request.getCoachNumber()+"%")
+                    builder.like(root.get("coachName"), "%"+request.getCoachName()+"%")
                 ));
             }
 

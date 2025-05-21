@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import java.util.Collections;
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1093,5 +1095,807 @@ public class CoachControllerTest {
 
             assertEquals(false, response.getStatus());
         });
+    }
+
+    @Test
+    void testDeletCoachSuccess() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
+
+        CoachEntity coach = new CoachEntity();
+        coach.setCoachName(eksCoachName);
+        coach.setCoachNumber(eksCoachNumber);
+        coach.setCoachTypeEntity(coachType);
+        coach.setIsActive(true);
+        coach.setUserEntity(user);
+        coachRepository.save(coach);
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + securityConstants.getJwtExpiration());
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                delete("/api/coaches/" + coach.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+                WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(true, response.getStatus());
+        });
+    }
+
+    @Test
+    void testDeletCoachBadId() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
+
+        CoachEntity coach = new CoachEntity();
+        coach.setCoachName(eksCoachName);
+        coach.setCoachNumber(eksCoachNumber);
+        coach.setCoachTypeEntity(coachType);
+        coach.setIsActive(true);
+        coach.setUserEntity(user);
+        coachRepository.save(coach);
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + securityConstants.getJwtExpiration());
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                delete("/api/coaches/" + coach.getId() + "a")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isBadRequest()
+        ).andDo(result -> {
+                WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });
+    }
+
+    @Test
+    void testDeletCoachNotFound() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
+
+        CoachEntity coach = new CoachEntity();
+        coach.setCoachName(eksCoachName);
+        coach.setCoachNumber(eksCoachNumber);
+        coach.setCoachTypeEntity(coachType);
+        coach.setIsActive(true);
+        coach.setUserEntity(user);
+        coachRepository.save(coach);
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + securityConstants.getJwtExpiration());
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                delete("/api/coaches/111111")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isNotFound()
+        ).andDo(result -> {
+                WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });
+    }
+
+    @Test
+    void testDeletCoachInvalidToken() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
+
+        CoachEntity coach = new CoachEntity();
+        coach.setCoachName(eksCoachName);
+        coach.setCoachNumber(eksCoachNumber);
+        coach.setCoachTypeEntity(coachType);
+        coach.setIsActive(true);
+        coach.setUserEntity(user);
+        coachRepository.save(coach);
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + securityConstants.getJwtExpiration());
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken + "a";
+
+        mockMvc.perform(
+                delete("/api/coaches/" + coach.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+                WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });
+    }
+
+    @Test
+    void testDeletCoachTokenExpired() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
+
+        CoachEntity coach = new CoachEntity();
+        coach.setCoachName(eksCoachName);
+        coach.setCoachNumber(eksCoachNumber);
+        coach.setCoachTypeEntity(coachType);
+        coach.setIsActive(true);
+        coach.setUserEntity(user);
+        coachRepository.save(coach);
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() - securityConstants.getJwtExpiration());
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                delete("/api/coaches/" + coach.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+                WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });
+    }
+
+    @Test
+    void testDeletCoachNoToken() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
+
+        CoachEntity coach = new CoachEntity();
+        coach.setCoachName(eksCoachName);
+        coach.setCoachNumber(eksCoachNumber);
+        coach.setCoachTypeEntity(coachType);
+        coach.setIsActive(true);
+        coach.setUserEntity(user);
+        coachRepository.save(coach);
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + securityConstants.getJwtExpiration());
+        userRepository.save(user);
+
+        mockMvc.perform(
+                delete("/api/coaches/" + coach.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                                                                     
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+                WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });
+    }
+
+    @Test
+    void testDeletCoachBadRole() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        RoleEntity role = roleRepository.findByName("ROLE_USER").orElse(null);
+        
+        user.setRoles(Collections.singletonList(role));          
+        userRepository.save(user);
+
+        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
+
+        CoachEntity coach = new CoachEntity();
+        coach.setCoachName(eksCoachName);
+        coach.setCoachNumber(eksCoachNumber);
+        coach.setCoachTypeEntity(coachType);
+        coach.setIsActive(true);
+        coach.setUserEntity(user);
+        coachRepository.save(coach);
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + securityConstants.getJwtExpiration());
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                delete("/api/coaches/" + coach.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isForbidden()
+        ).andDo(result -> {
+                WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });
+    }
+
+    @Test
+    void testGetAllCoachSuccess() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
+
+        for (int i = 0; i < 50; i++) {
+            CoachEntity coach = new CoachEntity();
+            coach.setCoachName(eksCoachName + i);
+            coach.setCoachNumber(eksCoachNumber + i);
+            coach.setCoachTypeEntity(coachType);
+            coach.setIsActive(true);
+            coach.setUserEntity(user);
+            coachRepository.save(coach);
+        }        
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + securityConstants.getJwtExpiration());
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                get("/api/coaches")                        
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+                WebResponse<List<CoachResponse>> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(true, response.getStatus());
+            assertEquals(10, response.getData().size());
+            assertEquals(5, response.getPaging().getTotalPage());
+            assertEquals(0, response.getPaging().getCurrentPage());
+            assertEquals(10, response.getPaging().getSize());
+        });        
+    }
+    
+    @Test
+    void testGetAllCoachInvalidToken() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
+
+        for (int i = 0; i < 50; i++) {
+            CoachEntity coach = new CoachEntity();
+            coach.setCoachName(eksCoachName + i);
+            coach.setCoachNumber(eksCoachNumber + i);
+            coach.setCoachTypeEntity(coachType);
+            coach.setIsActive(true);
+            coach.setUserEntity(user);
+            coachRepository.save(coach);
+        }        
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + securityConstants.getJwtExpiration());
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken + "a";
+
+        mockMvc.perform(
+                get("/api/coaches")                        
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+                WebResponse<List<CoachResponse>> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });        
+    }
+    
+    @Test
+    void testGetAllCoachTokenExpired() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
+
+        for (int i = 0; i < 50; i++) {
+            CoachEntity coach = new CoachEntity();
+            coach.setCoachName(eksCoachName + i);
+            coach.setCoachNumber(eksCoachNumber + i);
+            coach.setCoachTypeEntity(coachType);
+            coach.setIsActive(true);
+            coach.setUserEntity(user);
+            coachRepository.save(coach);
+        }        
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() - securityConstants.getJwtExpiration());
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                get("/api/coaches")                        
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+                WebResponse<List<CoachResponse>> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });        
+    }
+
+    @Test
+    void testGetAllCoachNoToken() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
+
+        for (int i = 0; i < 50; i++) {
+            CoachEntity coach = new CoachEntity();
+            coach.setCoachName(eksCoachName + i);
+            coach.setCoachNumber(eksCoachNumber + i);
+            coach.setCoachTypeEntity(coachType);
+            coach.setIsActive(true);
+            coach.setUserEntity(user);
+            coachRepository.save(coach);
+        }        
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + securityConstants.getJwtExpiration());
+        userRepository.save(user);        
+
+        mockMvc.perform(
+                get("/api/coaches")                        
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                                                                       
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+                WebResponse<List<CoachResponse>> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });        
+    }
+    
+    @Test
+    void testGetAllCoachBadRole() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        RoleEntity role = roleRepository.findByName("ROLE_USER").orElse(null);
+        
+        user.setRoles(Collections.singletonList(role));          
+        userRepository.save(user);
+
+        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
+
+        for (int i = 0; i < 50; i++) {
+            CoachEntity coach = new CoachEntity();
+            coach.setCoachName(eksCoachName + i);
+            coach.setCoachNumber(eksCoachNumber + i);
+            coach.setCoachTypeEntity(coachType);
+            coach.setIsActive(true);
+            coach.setUserEntity(user);
+            coachRepository.save(coach);
+        }        
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + securityConstants.getJwtExpiration());
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                get("/api/coaches")                        
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isForbidden()
+        ).andDo(result -> {
+                WebResponse<List<CoachResponse>> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });        
+    } 
+    
+    @Test
+    void testSearchCoachByName() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
+
+        for (int i = 0; i < 50; i++) {
+            CoachEntity coach = new CoachEntity();
+            coach.setCoachName(eksCoachName + i);
+            coach.setCoachNumber(eksCoachNumber + i);
+            coach.setCoachTypeEntity(coachType);
+            coach.setIsActive(true);
+            coach.setUserEntity(user);
+            coachRepository.save(coach);
+        }        
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + securityConstants.getJwtExpiration());
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                get("/api/coaches/search")
+                        .queryParam("coachName", "Eksekutif")                         
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+                WebResponse<List<CoachResponse>> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(true, response.getStatus());
+            assertEquals(10, response.getData().size());
+            assertEquals(5, response.getPaging().getTotalPage());
+            assertEquals(0, response.getPaging().getCurrentPage());
+            assertEquals(10, response.getPaging().getSize());
+        });        
+    }
+
+    @Test
+    void testSearchCoachNotFound() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
+
+        for (int i = 0; i < 50; i++) {
+            CoachEntity coach = new CoachEntity();
+            coach.setCoachName(eksCoachName + i);
+            coach.setCoachNumber(eksCoachNumber + i);
+            coach.setCoachTypeEntity(coachType);
+            coach.setIsActive(true);
+            coach.setUserEntity(user);
+            coachRepository.save(coach);
+        }        
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + securityConstants.getJwtExpiration());
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                get("/api/coaches/search")
+                        .queryParam("coachName", "Pan")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+                WebResponse<List<CoachResponse>> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(true, response.getStatus());
+            assertEquals(0, response.getData().size());
+            assertEquals(0, response.getPaging().getTotalPage());
+            assertEquals(0, response.getPaging().getCurrentPage());
+            assertEquals(10, response.getPaging().getSize());
+        });        
+    }
+    
+    @Test
+    void testSearchCoachInvalidToken() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
+
+        for (int i = 0; i < 50; i++) {
+            CoachEntity coach = new CoachEntity();
+            coach.setCoachName(eksCoachName + i);
+            coach.setCoachNumber(eksCoachNumber + i);
+            coach.setCoachTypeEntity(coachType);
+            coach.setIsActive(true);
+            coach.setUserEntity(user);
+            coachRepository.save(coach);
+        }        
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + securityConstants.getJwtExpiration());
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken + "a";
+
+        mockMvc.perform(
+                get("/api/coaches/search")
+                        .queryParam("coachName", "Eksekutif")                         
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+                WebResponse<List<CoachResponse>> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });        
+    }
+
+    @Test
+    void testSearchCoachByTokenExpired() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
+
+        for (int i = 0; i < 50; i++) {
+            CoachEntity coach = new CoachEntity();
+            coach.setCoachName(eksCoachName + i);
+            coach.setCoachNumber(eksCoachNumber + i);
+            coach.setCoachTypeEntity(coachType);
+            coach.setIsActive(true);
+            coach.setUserEntity(user);
+            coachRepository.save(coach);
+        }        
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() - securityConstants.getJwtExpiration());
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                get("/api/coaches/search")
+                        .queryParam("coachName", "Eksekutif")                         
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+                WebResponse<List<CoachResponse>> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });        
+    }
+
+    @Test
+    void testSearchCoachNoToken() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
+
+        for (int i = 0; i < 50; i++) {
+            CoachEntity coach = new CoachEntity();
+            coach.setCoachName(eksCoachName + i);
+            coach.setCoachNumber(eksCoachNumber + i);
+            coach.setCoachTypeEntity(coachType);
+            coach.setIsActive(true);
+            coach.setUserEntity(user);
+            coachRepository.save(coach);
+        }        
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + securityConstants.getJwtExpiration());
+        userRepository.save(user);        
+
+        mockMvc.perform(
+                get("/api/coaches/search")
+                        .queryParam("coachName", "Eksekutif")                         
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                                                                    
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+                WebResponse<List<CoachResponse>> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });        
+    }
+
+    @Test
+    void testSearchCoachByBadRole() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        RoleEntity role = roleRepository.findByName("ROLE_NOT_FOUND").orElse(null);
+        
+        user.setRoles(Collections.singletonList(role));          
+        userRepository.save(user);
+
+        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
+
+        for (int i = 0; i < 50; i++) {
+            CoachEntity coach = new CoachEntity();
+            coach.setCoachName(eksCoachName + i);
+            coach.setCoachNumber(eksCoachNumber + i);
+            coach.setCoachTypeEntity(coachType);
+            coach.setIsActive(true);
+            coach.setUserEntity(user);
+            coachRepository.save(coach);
+        }        
+
+        Authentication authentication = authenticationManager.authenticate(
+                                            new UsernamePasswordAuthenticationToken(
+                                                email, password)
+                                            );
+
+        String mockToken = jwtUtil.generateToken(authentication);
+
+        user.setToken(mockToken);
+        user.setTokenExpiredAt(System.currentTimeMillis() + securityConstants.getJwtExpiration());
+        userRepository.save(user);
+
+        String mockBearerToken = "Bearer " + mockToken;
+
+        mockMvc.perform(
+                get("/api/coaches/search")
+                        .queryParam("coachName", "Eksekutif")                         
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)                        
+                        .header("Authorization", mockBearerToken)                        
+        ).andExpectAll(
+                status().isForbidden()
+        ).andDo(result -> {
+                WebResponse<List<CoachResponse>> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertEquals(false, response.getStatus());
+        });        
     }
 }
