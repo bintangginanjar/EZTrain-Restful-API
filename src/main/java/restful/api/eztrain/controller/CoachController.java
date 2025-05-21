@@ -163,7 +163,7 @@ public class CoachController {
         consumes = MediaType.APPLICATION_JSON_VALUE,        
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public WebResponse<CoachResponse> assignCoach(Authentication authentication,                                             
+    public WebResponse<CoachResponse> assignSeat(Authentication authentication,                                             
                                             @PathVariable("coachId") String coachId,
                                             @PathVariable("seatId") String seatId) {        
         
@@ -182,7 +182,7 @@ public class CoachController {
         consumes = MediaType.APPLICATION_JSON_VALUE,        
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public WebResponse<CoachResponse> removeCoach(Authentication authentication, 
+    public WebResponse<CoachResponse> removeSeat(Authentication authentication, 
                                             @PathVariable("coachId") String coachId,
                                             @PathVariable("seatId") String seatId) {        
         
