@@ -48,7 +48,7 @@ public class SeatController {
 
     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
     @GetMapping(
-        path = "/api/coaches/{coachId}",        
+        path = "/api/seats/{seatId}",
         produces = MediaType.APPLICATION_JSON_VALUE
     )    
     public WebResponse<SeatResponse> get(Authentication authentication, 
