@@ -21,31 +21,20 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Entity
+@Table(name = "route_prices")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Entity
-@Table(name = "routes")
-public class RouteEntity {
+public class RoutePriceEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "origin_station_id", nullable = false, referencedColumnName = "id")
-    private StationEntity origin;
-
-    @ManyToOne
-    @JoinColumn(name = "destination_station_id", nullable = false, referencedColumnName = "id")
-    private StationEntity destination;
-    
     @Column(nullable = false)
-    private Double tripDistance;
-
-    @Column(nullable = false)
-    private Integer tripDuration;
+    private Double price;
 
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
@@ -56,16 +45,14 @@ public class RouteEntity {
     private Date updatedAt;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false, referencedColumnName = "id")
-    private UserEntity userEntity;
+    @JoinColumn(name = "coach_type_id", nullable = false, referencedColumnName = "id")
+    private CoachTypeEntity coachTypeEntity;
 
-    @OneToMany(mappedBy = "routeEntity", cascade = CascadeType.ALL)
-    private List<RoutePriceEntity> routePrices;
+    @ManyToOne
+    @JoinColumn(name = "route_id", nullable = false, referencedColumnName = "id")
+    private RouteEntity routeEntity;
 
-    @OneToMany(mappedBy = "routeEntity", cascade = CascadeType.ALL)
-    private List<ScheduleEntity> schedules;
-
-    @OneToMany(mappedBy = "routeEntity", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "routePriceEntity", cascade = CascadeType.ALL)
     private List<TicketEntity> tickets;
 
 }

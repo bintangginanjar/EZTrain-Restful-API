@@ -57,4 +57,12 @@ public class TicketEntity {
     @JoinColumn(name = "seat_id", nullable = false, referencedColumnName = "id")
     private SeatEntity seatEntity;
 
+    @ManyToOne
+    @JoinColumn(name = "route_id", nullable = false, referencedColumnName = "id")
+    private RouteEntity routeEntity;
+
+    @ManyToOne
+    @JoinColumn(name = "route_price_id", nullable = false, referencedColumnName = "id")
+    private RoutePriceEntity routePriceEntity;
+
 }

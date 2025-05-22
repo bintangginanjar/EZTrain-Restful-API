@@ -45,4 +45,7 @@ public class CoachTypeEntity {
     @OneToMany(mappedBy = "coachTypeEntity", cascade = CascadeType.ALL)
     private List<CoachEntity> coaches;
 
+    @OneToMany(mappedBy = "coachTypeEntity", cascade = CascadeType.ALL)
+    private List<RoutePriceEntity> routePrices;
+
 }
