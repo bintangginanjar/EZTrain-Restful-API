@@ -90,7 +90,7 @@ public class CoachService {
     }
 
     @Transactional(readOnly = true)
-    public CoachResponse get(Authentication authentication, String strCoachId) {        
+    public CoachResponse get(String strCoachId) {        
         Long coachId;
 
         try {        
@@ -157,7 +157,7 @@ public class CoachService {
         try {
             coachRepository.save(coach);
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Register coach failed");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Update coach failed");
         }
 
         return ResponseMapper.ToCoachResponseMapper(coach);

@@ -30,10 +30,6 @@ public class CoachController {
     @Autowired
     CoachService coachService;
 
-    public CoachController(CoachService coachService) {
-        this.coachService = coachService;
-    }
-
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(
         path = "/api/coaches",
@@ -58,11 +54,11 @@ public class CoachController {
     public WebResponse<CoachResponse> get(Authentication authentication, 
                                         @PathVariable("coachId") String coachId) { 
 
-        CoachResponse response = coachService.get(authentication, coachId);
+        CoachResponse response = coachService.get(coachId);
 
         return WebResponse.<CoachResponse>builder()
                                             .status(true)
-                                            .messages("Train fetching success")
+                                            .messages("Coach fetching success")
                                             .data(response)
                                             .build();
     }

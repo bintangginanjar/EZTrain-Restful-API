@@ -4,11 +4,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import restful.api.eztrain.entity.CoachEntity;
+import restful.api.eztrain.entity.SeatEntity;
 import restful.api.eztrain.entity.StationEntity;
 import restful.api.eztrain.entity.TrainEntity;
 import restful.api.eztrain.entity.UserEntity;
 import restful.api.eztrain.model.CoachResponse;
 import restful.api.eztrain.model.ForgotPasswordResponse;
+import restful.api.eztrain.model.SeatResponse;
 import restful.api.eztrain.model.StationResponse;
 import restful.api.eztrain.model.TokenResponse;
 import restful.api.eztrain.model.TrainResponse;
@@ -69,19 +71,6 @@ public class ResponseMapper {
                 .build();
     }
 
-    public static List<StationResponse> ToStationResponseListMapper(List<StationEntity> stations) {
-        return stations.stream()
-                            .map(
-                                p -> new StationResponse(
-                                    p.getId(),      
-                                    p.getCode(),                
-                                    p.getName(),
-                                    p.getCity(),
-                                    p.getProvince(),
-                                    p.getIsActive()
-                                )).collect(Collectors.toList());
-    }
-
     public static TrainResponse ToTrainResponseMapper(TrainEntity train) {
         List<String> coaches = train.getCoaches().stream().map(p -> p.getCoachName()).toList();
 
@@ -95,19 +84,6 @@ public class ResponseMapper {
                 .build();
     }
 
-    public static List<TrainResponse> ToTrainResponseListMapper(List<TrainEntity> trains) {
-        return trains.stream()
-                            .map(
-                                p -> new TrainResponse(
-                                    p.getId(),                                                         
-                                    p.getName(),
-                                    p.getTrainType(),
-                                    p.getOperator(),
-                                    p.getIsActive(),
-                                    p.getCoaches().stream().map(s -> s.getCoachName()).toList()
-                                )).collect(Collectors.toList());
-    }
-
     public static CoachResponse ToCoachResponseMapper(CoachEntity coach) {
         List<String> seats = coach.getSeats().stream().map(p -> p.getSeatNumber()).toList();
 
@@ -118,6 +94,13 @@ public class ResponseMapper {
                 .coachTypeId(coach.getCoachTypeEntity().getId())
                 .coachTypeName(coach.getCoachTypeEntity().getName())
                 .seats(seats)
+                .build();
+    }
+
+    public static SeatResponse ToSeatResponseMapper(SeatEntity seat) {
+        return SeatResponse.builder()
+                .id(seat.getId())
+                .seatNumber(seat.getSeatNumber())
                 .build();
     }
 }
