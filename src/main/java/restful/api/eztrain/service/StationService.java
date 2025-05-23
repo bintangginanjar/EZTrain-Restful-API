@@ -163,11 +163,7 @@ public class StationService {
 
     @SuppressWarnings("null")
     @Transactional(readOnly = true)
-    public Page<StationResponse> search(Authentication authentication, SearchStationRequest request) {
-        if (userRepository.findByEmail(authentication.getName()) == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found");
-        }        
-
+    public Page<StationResponse> search(SearchStationRequest request) {        
         Specification<StationEntity> specification = (root, query, builder) -> {
             List<Predicate> predicates = new ArrayList<>();            
 

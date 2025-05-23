@@ -148,7 +148,7 @@ public class StationController {
                                         .province(province)
                                         .build();
 
-        Page<StationResponse> response = stationService.search(authentication, request);
+        Page<StationResponse> response = stationService.search(request);
         
         return WebResponse.<List<StationResponse>>builder()
                             .status(true)

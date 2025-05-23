@@ -17,5 +17,7 @@ public interface StationRepository extends JpaRepository<StationEntity, Long>, J
 
     Optional<StationEntity> findByCode(String code);
 
+    Optional<StationEntity> findByName(String name);
+
     List<StationEntity> findAllByUserEntity(UserEntity user);
 }
