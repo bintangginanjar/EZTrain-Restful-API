@@ -4,12 +4,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import restful.api.eztrain.entity.CoachEntity;
+import restful.api.eztrain.entity.RouteEntity;
 import restful.api.eztrain.entity.SeatEntity;
 import restful.api.eztrain.entity.StationEntity;
 import restful.api.eztrain.entity.TrainEntity;
 import restful.api.eztrain.entity.UserEntity;
 import restful.api.eztrain.model.CoachResponse;
 import restful.api.eztrain.model.ForgotPasswordResponse;
+import restful.api.eztrain.model.RouteResponse;
 import restful.api.eztrain.model.SeatResponse;
 import restful.api.eztrain.model.StationResponse;
 import restful.api.eztrain.model.TokenResponse;
@@ -101,6 +103,18 @@ public class ResponseMapper {
         return SeatResponse.builder()
                 .id(seat.getId())
                 .seatNumber(seat.getSeatNumber())
+                .build();
+    }
+
+    public static RouteResponse ToRouteResponseMapper(RouteEntity route) {
+        return RouteResponse.builder()
+                .id(route.getId())
+                .originId(route.getOrigin().getId())
+                .origin(route.getOrigin().getName())
+                .destId(route.getDestination().getId())
+                .destination(route.getDestination().getName())                
+                .tripDistance(route.getTripDistance())                
+                .tripDuration(route.getTripDuration())
                 .build();
     }
 }
