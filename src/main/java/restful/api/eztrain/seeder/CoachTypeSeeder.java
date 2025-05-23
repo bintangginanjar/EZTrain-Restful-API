@@ -1,5 +1,6 @@
 package restful.api.eztrain.seeder;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -9,11 +10,8 @@ import restful.api.eztrain.repository.CoachTypeRepository;
 @Component
 public class CoachTypeSeeder implements CommandLineRunner {
 
+    @Autowired
     private CoachTypeRepository coachTypeRepository;
-
-    public CoachTypeSeeder(CoachTypeRepository coachTypeRepository) {
-        this.coachTypeRepository = coachTypeRepository;
-    }
 
     @Override
     public void run(String... args) throws Exception {
