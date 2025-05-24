@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import restful.api.eztrain.entity.StationEntity;
@@ -13,6 +14,7 @@ import restful.api.eztrain.repository.StationRepository;
 import restful.api.eztrain.repository.UserRepository;
 
 @Component
+@Order(3)
 public class StationSeeder implements CommandLineRunner {
 
     @Autowired

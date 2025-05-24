@@ -2,12 +2,14 @@ package restful.api.eztrain.seeder;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import restful.api.eztrain.entity.CoachTypeEntity;
 import restful.api.eztrain.repository.CoachTypeRepository;
 
 @Component
+@Order(2)
 public class CoachTypeSeeder implements CommandLineRunner {
 
     @Autowired

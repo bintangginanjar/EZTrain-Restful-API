@@ -3,6 +3,8 @@ package restful.api.eztrain.seeder;
 import java.util.Collections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import restful.api.eztrain.entity.RoleEntity;
@@ -11,6 +13,7 @@ import restful.api.eztrain.repository.RoleRepository;
 import restful.api.eztrain.repository.UserRepository;
 
 @Component
+@Order(1)
 public class UserRoleSeeder implements CommandLineRunner {
 
     @Autowired
@@ -18,6 +21,9 @@ public class UserRoleSeeder implements CommandLineRunner {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) throws Exception {
@@ -40,7 +46,7 @@ public class UserRoleSeeder implements CommandLineRunner {
             RoleEntity fetchAdminRole = roleRepository.findByName(roleAdmin).orElseThrow(null);
             UserEntity userAdmin = new UserEntity();            
             userAdmin.setEmail("admin@gmail.com");      
-            userAdmin.setPassword("th3_k0p_4t_springboot");        
+            userAdmin.setPassword(passwordEncoder.encode("rahasia"));        
             userAdmin.setRoles(Collections.singletonList(fetchAdminRole));
             userAdmin.setIsVerified(false);
             userAdmin.setIsActive(false);            
@@ -48,7 +54,7 @@ public class UserRoleSeeder implements CommandLineRunner {
             RoleEntity fetchUserRole = roleRepository.findByName(roleUser).orElseThrow(null);
             UserEntity userUser = new UserEntity();            
             userUser.setEmail("user@gmail.com");      
-            userUser.setPassword("th3_k0p_4t_springboot");        
+            userUser.setPassword(passwordEncoder.encode("rahasia"));        
             userUser.setRoles(Collections.singletonList(fetchUserRole));
             userUser.setIsVerified(false);
             userUser.setIsActive(false);
