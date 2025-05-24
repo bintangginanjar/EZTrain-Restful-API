@@ -109,7 +109,7 @@ public class TrainController {
         path = "/api/trains",        
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public WebResponse<List<TrainResponse>> getAlltrain(
+    public WebResponse<List<TrainResponse>> getAllTrain(
                                                 @RequestParam(value = "page", defaultValue = "0") Integer page,
                                                 @RequestParam(value = "size", defaultValue = "10") Integer size) {
 
