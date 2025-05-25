@@ -52,7 +52,7 @@ public class CoachController {
         produces = MediaType.APPLICATION_JSON_VALUE
     )    
     public WebResponse<CoachResponse> get(Authentication authentication, 
-                                        @PathVariable("coachId") String coachId) { 
+                                        @PathVariable("coachId") Long coachId) { 
 
         CoachResponse response = coachService.get(coachId);
 
@@ -71,7 +71,7 @@ public class CoachController {
     )
     public WebResponse<CoachResponse> update(Authentication authentication, 
                                             @RequestBody UpdateCoachRequest request,
-                                            @PathVariable("coachId") String coachId) {
+                                            @PathVariable("coachId") Long coachId) {
 
         request.setId(coachId);
         
@@ -90,7 +90,7 @@ public class CoachController {
         produces = MediaType.APPLICATION_JSON_VALUE
     )
     public WebResponse<String> delete(Authentication authentication,
-                                            @PathVariable("coachId") String coachId) {
+                                            @PathVariable("coachId") Long coachId) {
 
         coachService.delete(coachId);
 
@@ -160,8 +160,8 @@ public class CoachController {
         produces = MediaType.APPLICATION_JSON_VALUE
     )
     public WebResponse<CoachResponse> assignSeat(Authentication authentication,                                             
-                                            @PathVariable("coachId") String coachId,
-                                            @PathVariable("seatId") String seatId) {        
+                                            @PathVariable("coachId") Long coachId,
+                                            @PathVariable("seatId") Long seatId) {        
         
         CoachResponse response = coachService.assignSeat(coachId, seatId);
 
@@ -179,8 +179,8 @@ public class CoachController {
         produces = MediaType.APPLICATION_JSON_VALUE
     )
     public WebResponse<CoachResponse> removeSeat(Authentication authentication, 
-                                            @PathVariable("coachId") String coachId,
-                                            @PathVariable("seatId") String seatId) {        
+                                            @PathVariable("coachId") Long coachId,
+                                            @PathVariable("seatId") Long seatId) {        
         
         CoachResponse response = coachService.removeSeat(coachId, seatId);
 

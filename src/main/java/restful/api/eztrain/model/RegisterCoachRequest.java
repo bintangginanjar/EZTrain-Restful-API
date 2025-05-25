@@ -19,7 +19,7 @@ public class RegisterCoachRequest {
     @NotNull
     private Integer coachNumber;
     
-    @NotBlank
-    private String coachTypeId;    
+    @NotNull
+    private Long coachTypeId;    
 
 }

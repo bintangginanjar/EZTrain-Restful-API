@@ -59,17 +59,9 @@ public class CoachService {
 
         if (coachRepository.findByCoachName(request.getCoachName()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Coach already registered");
-        }
-
-        Long coachTypeId;
-
-        try {        
-            coachTypeId = Long.parseLong(request.getCoachTypeId());
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
-        }
+        }        
         
-        CoachTypeEntity coachType = coachTypeRepository.findById(coachTypeId)
+        CoachTypeEntity coachType = coachTypeRepository.findById(request.getCoachTypeId())
                                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Coach type not found"));
 
         CoachEntity coach = new CoachEntity();
@@ -90,15 +82,7 @@ public class CoachService {
     }
 
     @Transactional(readOnly = true)
-    public CoachResponse get(String strCoachId) {        
-        Long coachId;
-
-        try {        
-            coachId = Long.parseLong(strCoachId);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
-        }        
-
+    public CoachResponse get(Long coachId) {             
         CoachEntity coach = coachRepository.findById(coachId)
                             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Coach not found"));                ;
 
@@ -120,24 +104,14 @@ public class CoachService {
     }    
 
     @Transactional
-    public CoachResponse update(Authentication authentication, UpdateCoachRequest request, String strCoachId) {
-        Long coachId;
-        Long coachTypeId;
-
-        try {        
-            coachId = Long.parseLong(strCoachId);
-            coachTypeId = Long.parseLong(request.getCoachTypeId());
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
-        }
-
+    public CoachResponse update(Authentication authentication, UpdateCoachRequest request, Long coachId) {    
         UserEntity user = userRepository.findByEmail(authentication.getName())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         CoachEntity coach = coachRepository.findById(coachId)
                             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Coach not found"));       
         
-        CoachTypeEntity coachType = coachTypeRepository.findById(coachTypeId)
+        CoachTypeEntity coachType = coachTypeRepository.findById(request.getCoachTypeId())
                                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Coach type not found"));
 
         if (Objects.nonNull(request.getCoachName())) {
@@ -164,15 +138,7 @@ public class CoachService {
     }
 
     @Transactional
-    public void delete(String strCoachId) {
-        Long coachId;
-
-        try {        
-            coachId = Long.parseLong(strCoachId);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
-        }
-
+    public void delete(long coachId) {    
         CoachEntity coach = coachRepository.findById(coachId)
                             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Coach not found"));
 
@@ -210,17 +176,7 @@ public class CoachService {
     }
 
     @Transactional
-    public CoachResponse assignSeat(String strCoachId, String strSeatId) {    
-        Long coachId;
-        Long seatId;
-
-        try {            
-            coachId = Long.parseLong(strCoachId);
-            seatId = Long.parseLong(strSeatId);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
-        }
-
+    public CoachResponse assignSeat(Long coachId, Long seatId) {            
         CoachEntity coach = coachRepository.findById(coachId)
                             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Coach not found"));
 
@@ -239,17 +195,7 @@ public class CoachService {
     }
 
     @Transactional
-    public CoachResponse removeSeat(String strCoachId, String strSeatId) {
-        Long coachId;
-        Long seatId;
-
-        try {            
-            coachId = Long.parseLong(strCoachId);
-            seatId = Long.parseLong(strSeatId);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
-        }
-
+    public CoachResponse removeSeat(Long coachId, Long seatId) {        
         CoachEntity coach = coachRepository.findById(coachId)
                             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Coach not found"));
 
