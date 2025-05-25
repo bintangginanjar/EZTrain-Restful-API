@@ -17,7 +17,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
@@ -56,10 +55,7 @@ public class StationControllerTest {
     private StationRepository stationRepository;
 
     @Autowired
-    private StationSeeder stationSeeder;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private StationSeeder stationSeeder;    
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -76,25 +72,17 @@ public class StationControllerTest {
     private final String email = "admin@gmail.com";
     private final String password = "rahasia";
 
-    private final String bdCode = "BDO";
+    private final String bdCode = "BD";
     private final String bdName = "Bandung";
     private final String bdCity = "Bandung";
-    private final String bdProvince = "West Java";
-    
-    private final String gbCode = "GBR";
-    private final String gbName = "Gambir";
-    private final String gbCity = "Jakarta";
-    private final String gbProvince = "DKI Jakarta";
+    private final String bdProvince = "Jawa Barat";        
 
-    private final String ykCode = "DIY";
-    private final String ykName = "Yogyakarta";
-    private final String ykCity = "Yogyakarta";
-    private final String ykProvince = "DI Yogyakarta";
+    private final String ykCode = "YK";    
     
     private final String bwCode = "BW";
     private final String bwName = "Banyuwangi";
     private final String bwCity = "Banyuwangi";
-    private final String bwProvince = "East Java";
+    private final String bwProvince = "Jawa Timur";
 
     @BeforeEach
     void setUp() {                
@@ -194,15 +182,6 @@ public class StationControllerTest {
     @Test
     void testRegisterStationDuplicate() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
-
-        StationEntity station = new StationEntity();
-        station.setCode(bdCode);
-        station.setName(bdName);
-        station.setCity(bdCity);
-        station.setProvince(bdProvince);
-        station.setIsActive(true);
-        station.setUserEntity(user);
-        stationRepository.save(station);
 
         RegisterStationRequest request = new RegisterStationRequest();
         request.setCode(bdCode);
@@ -401,14 +380,7 @@ public class StationControllerTest {
     void testGetStationSuccess() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        StationEntity station = new StationEntity();
-        station.setCode(bdCode);
-        station.setName(bdName);
-        station.setCity(bdCity);
-        station.setProvince(bdProvince);
-        station.setIsActive(true);
-        station.setUserEntity(user);
-        stationRepository.save(station);
+        StationEntity station = stationRepository.findByCode(bdCode).orElse(null);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -435,6 +407,7 @@ public class StationControllerTest {
             });
 
             assertEquals(true, response.getStatus());
+            assertEquals(station.getId(), response.getData().getId());
             assertEquals(station.getCode(), response.getData().getCode());
             assertEquals(station.getName(), response.getData().getName());
             assertEquals(station.getCity(), response.getData().getCity());
@@ -446,14 +419,7 @@ public class StationControllerTest {
     void testGetStationBadId() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        StationEntity station = new StationEntity();
-        station.setCode(bdCode);
-        station.setName(bdName);
-        station.setCity(bdCity);
-        station.setProvince(bdProvince);
-        station.setIsActive(true);
-        station.setUserEntity(user);
-        stationRepository.save(station);
+        StationEntity station = stationRepository.findByCode(bdCode).orElse(null);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -485,16 +451,7 @@ public class StationControllerTest {
 
     @Test
     void testGetStationNotFound() throws Exception {
-        UserEntity user = userRepository.findByEmail(email).orElse(null);
-
-        StationEntity station = new StationEntity();
-        station.setCode(bdCode);
-        station.setName(bdName);
-        station.setCity(bdCity);
-        station.setProvince(bdProvince);
-        station.setIsActive(true);
-        station.setUserEntity(user);
-        stationRepository.save(station);
+        UserEntity user = userRepository.findByEmail(email).orElse(null);        
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -528,14 +485,7 @@ public class StationControllerTest {
     void testGetStationInvalidToken() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        StationEntity station = new StationEntity();
-        station.setCode(bdCode);
-        station.setName(bdName);
-        station.setCity(bdCity);
-        station.setProvince(bdProvince);
-        station.setIsActive(true);
-        station.setUserEntity(user);
-        stationRepository.save(station);
+        StationEntity station = stationRepository.findByCode(bdCode).orElse(null);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -569,14 +519,7 @@ public class StationControllerTest {
     void testGetStationTokenExpired() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        StationEntity station = new StationEntity();
-        station.setCode(bdCode);
-        station.setName(bdName);
-        station.setCity(bdCity);
-        station.setProvince(bdProvince);
-        station.setIsActive(true);
-        station.setUserEntity(user);
-        stationRepository.save(station);
+        StationEntity station = stationRepository.findByCode(bdCode).orElse(null);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -610,14 +553,7 @@ public class StationControllerTest {
     void testGetStationNoToken() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        StationEntity station = new StationEntity();
-        station.setCode(bdCode);
-        station.setName(bdName);
-        station.setCity(bdCity);
-        station.setProvince(bdProvince);
-        station.setIsActive(true);
-        station.setUserEntity(user);
-        stationRepository.save(station);
+        StationEntity station = stationRepository.findByCode(bdCode).orElse(null);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -653,14 +589,7 @@ public class StationControllerTest {
         user.setRoles(Collections.singletonList(role));          
         userRepository.save(user);
 
-        StationEntity station = new StationEntity();
-        station.setCode(bdCode);
-        station.setName(bdName);
-        station.setCity(bdCity);
-        station.setProvince(bdProvince);
-        station.setIsActive(true);
-        station.setUserEntity(user);
-        stationRepository.save(station);
+        StationEntity station = stationRepository.findByCode(bdCode).orElse(null);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -692,18 +621,7 @@ public class StationControllerTest {
 
     @Test
     void testGetAllStationSuccess() throws Exception {
-        UserEntity user = userRepository.findByEmail(email).orElse(null);
-
-        for (int i = 0; i < 50; i++) {
-            StationEntity station = new StationEntity();
-            station.setCode(bdCode + i);
-            station.setName(bdName + i);
-            station.setCity(bdCity + i);
-            station.setProvince(bdProvince + i);
-            station.setIsActive(true);
-            station.setUserEntity(user);
-            stationRepository.save(station);
-        }
+        UserEntity user = userRepository.findByEmail(email).orElse(null);        
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -731,7 +649,7 @@ public class StationControllerTest {
 
             assertEquals(true, response.getStatus());            
             assertEquals(10, response.getData().size());
-            assertEquals(5, response.getPaging().getTotalPage());
+            assertEquals(1, response.getPaging().getTotalPage());
             assertEquals(0, response.getPaging().getCurrentPage());
             assertEquals(10, response.getPaging().getSize());
         });        
@@ -740,17 +658,6 @@ public class StationControllerTest {
     @Test
     void testGetAllStationInvalidToken() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
-
-        for (int i = 0; i < 50; i++) {
-            StationEntity station = new StationEntity();
-            station.setCode(bdCode + i);
-            station.setName(bdName + i);
-            station.setCity(bdCity + i);
-            station.setProvince(bdProvince + i);
-            station.setIsActive(true);
-            station.setUserEntity(user);
-            stationRepository.save(station);
-        }
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -784,17 +691,6 @@ public class StationControllerTest {
     void testGetAllStationTokenExpired() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        for (int i = 0; i < 50; i++) {
-            StationEntity station = new StationEntity();
-            station.setCode(bdCode + i);
-            station.setName(bdName + i);
-            station.setCity(bdCity + i);
-            station.setProvince(bdProvince + i);
-            station.setIsActive(true);
-            station.setUserEntity(user);
-            stationRepository.save(station);
-        }
-
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
                                                 email, password)
@@ -826,17 +722,6 @@ public class StationControllerTest {
     @Test
     void testGetAllStationNoToken() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
-
-        for (int i = 0; i < 50; i++) {
-            StationEntity station = new StationEntity();
-            station.setCode(bdCode + i);
-            station.setName(bdName + i);
-            station.setCity(bdCity + i);
-            station.setProvince(bdProvince + i);
-            station.setIsActive(true);
-            station.setUserEntity(user);
-            stationRepository.save(station);
-        }
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -872,17 +757,6 @@ public class StationControllerTest {
         user.setRoles(Collections.singletonList(role));          
         userRepository.save(user);
 
-        for (int i = 0; i < 50; i++) {
-            StationEntity station = new StationEntity();
-            station.setCode(bdCode + i);
-            station.setName(bdName + i);
-            station.setCity(bdCity + i);
-            station.setProvince(bdProvince + i);
-            station.setIsActive(true);
-            station.setUserEntity(user);
-            stationRepository.save(station);
-        }
-
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
                                                 email, password)
@@ -915,32 +789,7 @@ public class StationControllerTest {
     void testUpdateStationSuccess() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        StationEntity bdStation = new StationEntity();
-        bdStation.setCode(bdCode);
-        bdStation.setName(bdName);
-        bdStation.setCity(bdCity);
-        bdStation.setProvince(bdProvince);
-        bdStation.setIsActive(true);
-        bdStation.setUserEntity(user);
-        stationRepository.save(bdStation);
-        
-        StationEntity gbStation = new StationEntity();
-        gbStation.setCode(gbCode);
-        gbStation.setName(gbName);
-        gbStation.setCity(gbCity);
-        gbStation.setProvince(gbProvince);
-        gbStation.setIsActive(true);
-        gbStation.setUserEntity(user);
-        stationRepository.save(gbStation);
-
-        StationEntity ykStation = new StationEntity();
-        ykStation.setCode(ykCode);
-        ykStation.setName(ykName);
-        ykStation.setCity(ykCity);
-        ykStation.setProvince(ykProvince);
-        ykStation.setIsActive(true);
-        ykStation.setUserEntity(user);
-        stationRepository.save(ykStation);
+        StationEntity station = stationRepository.findByCode(bdCode).orElse(null);
 
         UpdateStationRequest request = new UpdateStationRequest();        
         request.setCode(bdCode + "updated");
@@ -962,7 +811,7 @@ public class StationControllerTest {
         String mockBearerToken = "Bearer " + mockToken;
 
         mockMvc.perform(
-                patch("/api/stations/" + bdStation.getId())
+                patch("/api/stations/" + station.getId())
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
@@ -974,6 +823,7 @@ public class StationControllerTest {
             });
 
             assertEquals(true, response.getStatus());
+            assertEquals(station.getId(), response.getData().getId());
             assertEquals(request.getCode(), response.getData().getCode());
             assertEquals(request.getName(), response.getData().getName());
             assertEquals(request.getCity(), response.getData().getCity());
@@ -983,34 +833,9 @@ public class StationControllerTest {
 
     @Test
     void testUpdateStationDuplicate() throws Exception {
-        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        UserEntity user = userRepository.findByEmail(email).orElse(null);       
 
-        StationEntity bdStation = new StationEntity();
-        bdStation.setCode(bdCode);
-        bdStation.setName(bdName);
-        bdStation.setCity(bdCity);
-        bdStation.setProvince(bdProvince);
-        bdStation.setIsActive(true);
-        bdStation.setUserEntity(user);
-        stationRepository.save(bdStation);
-        
-        StationEntity gbStation = new StationEntity();
-        gbStation.setCode(gbCode);
-        gbStation.setName(gbName);
-        gbStation.setCity(gbCity);
-        gbStation.setProvince(gbProvince);
-        gbStation.setIsActive(true);
-        gbStation.setUserEntity(user);
-        stationRepository.save(gbStation);
-
-        StationEntity ykStation = new StationEntity();
-        ykStation.setCode(ykCode);
-        ykStation.setName(ykName);
-        ykStation.setCity(ykCity);
-        ykStation.setProvince(ykProvince);
-        ykStation.setIsActive(true);
-        ykStation.setUserEntity(user);
-        stationRepository.save(ykStation);
+        StationEntity station = stationRepository.findByCode(bdCode).orElse(null);
 
         UpdateStationRequest request = new UpdateStationRequest();        
         request.setCode(ykCode);
@@ -1032,7 +857,7 @@ public class StationControllerTest {
         String mockBearerToken = "Bearer " + mockToken;
 
         mockMvc.perform(
-                patch("/api/stations/" + bdStation.getId())
+                patch("/api/stations/" + station.getId())
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
@@ -1051,32 +876,7 @@ public class StationControllerTest {
     void testUpdateStationInvalidToken() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        StationEntity bdStation = new StationEntity();
-        bdStation.setCode(bdCode);
-        bdStation.setName(bdName);
-        bdStation.setCity(bdCity);
-        bdStation.setProvince(bdProvince);
-        bdStation.setIsActive(true);
-        bdStation.setUserEntity(user);
-        stationRepository.save(bdStation);
-        
-        StationEntity gbStation = new StationEntity();
-        gbStation.setCode(gbCode);
-        gbStation.setName(gbName);
-        gbStation.setCity(gbCity);
-        gbStation.setProvince(gbProvince);
-        gbStation.setIsActive(true);
-        gbStation.setUserEntity(user);
-        stationRepository.save(gbStation);
-
-        StationEntity ykStation = new StationEntity();
-        ykStation.setCode(ykCode);
-        ykStation.setName(ykName);
-        ykStation.setCity(ykCity);
-        ykStation.setProvince(ykProvince);
-        ykStation.setIsActive(true);
-        ykStation.setUserEntity(user);
-        stationRepository.save(ykStation);
+        StationEntity station = stationRepository.findByCode(bdCode).orElse(null);
 
         UpdateStationRequest request = new UpdateStationRequest();        
         request.setCode(bdCode + "updated");
@@ -1098,7 +898,7 @@ public class StationControllerTest {
         String mockBearerToken = "Bearer " + mockToken + "a";
 
         mockMvc.perform(
-                patch("/api/stations/" + bdStation.getId())
+                patch("/api/stations/" + station.getId())
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
@@ -1117,32 +917,7 @@ public class StationControllerTest {
     void testUpdateStationTokenExpired() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        StationEntity bdStation = new StationEntity();
-        bdStation.setCode(bdCode);
-        bdStation.setName(bdName);
-        bdStation.setCity(bdCity);
-        bdStation.setProvince(bdProvince);
-        bdStation.setIsActive(true);
-        bdStation.setUserEntity(user);
-        stationRepository.save(bdStation);
-        
-        StationEntity gbStation = new StationEntity();
-        gbStation.setCode(gbCode);
-        gbStation.setName(gbName);
-        gbStation.setCity(gbCity);
-        gbStation.setProvince(gbProvince);
-        gbStation.setIsActive(true);
-        gbStation.setUserEntity(user);
-        stationRepository.save(gbStation);
-
-        StationEntity ykStation = new StationEntity();
-        ykStation.setCode(ykCode);
-        ykStation.setName(ykName);
-        ykStation.setCity(ykCity);
-        ykStation.setProvince(ykProvince);
-        ykStation.setIsActive(true);
-        ykStation.setUserEntity(user);
-        stationRepository.save(ykStation);
+        StationEntity station = stationRepository.findByCode(bdCode).orElse(null);
 
         UpdateStationRequest request = new UpdateStationRequest();        
         request.setCode(bdCode + "updated");
@@ -1164,7 +939,7 @@ public class StationControllerTest {
         String mockBearerToken = "Bearer " + mockToken;
 
         mockMvc.perform(
-                patch("/api/stations/" + bdStation.getId())
+                patch("/api/stations/" + station.getId())
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
@@ -1183,32 +958,7 @@ public class StationControllerTest {
     void testUpdateStationNoToken() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        StationEntity bdStation = new StationEntity();
-        bdStation.setCode(bdCode);
-        bdStation.setName(bdName);
-        bdStation.setCity(bdCity);
-        bdStation.setProvince(bdProvince);
-        bdStation.setIsActive(true);
-        bdStation.setUserEntity(user);
-        stationRepository.save(bdStation);
-        
-        StationEntity gbStation = new StationEntity();
-        gbStation.setCode(gbCode);
-        gbStation.setName(gbName);
-        gbStation.setCity(gbCity);
-        gbStation.setProvince(gbProvince);
-        gbStation.setIsActive(true);
-        gbStation.setUserEntity(user);
-        stationRepository.save(gbStation);
-
-        StationEntity ykStation = new StationEntity();
-        ykStation.setCode(ykCode);
-        ykStation.setName(ykName);
-        ykStation.setCity(ykCity);
-        ykStation.setProvince(ykProvince);
-        ykStation.setIsActive(true);
-        ykStation.setUserEntity(user);
-        stationRepository.save(ykStation);
+        StationEntity station = stationRepository.findByCode(bdCode).orElse(null);
 
         UpdateStationRequest request = new UpdateStationRequest();        
         request.setCode(bdCode + "updated");
@@ -1228,7 +978,7 @@ public class StationControllerTest {
         userRepository.save(user);        
 
         mockMvc.perform(
-                patch("/api/stations/" + bdStation.getId())
+                patch("/api/stations/" + station.getId())
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))                                              
@@ -1251,32 +1001,7 @@ public class StationControllerTest {
         user.setRoles(Collections.singletonList(role));          
         userRepository.save(user);
 
-        StationEntity bdStation = new StationEntity();
-        bdStation.setCode(bdCode);
-        bdStation.setName(bdName);
-        bdStation.setCity(bdCity);
-        bdStation.setProvince(bdProvince);
-        bdStation.setIsActive(true);
-        bdStation.setUserEntity(user);
-        stationRepository.save(bdStation);
-        
-        StationEntity gbStation = new StationEntity();
-        gbStation.setCode(gbCode);
-        gbStation.setName(gbName);
-        gbStation.setCity(gbCity);
-        gbStation.setProvince(gbProvince);
-        gbStation.setIsActive(true);
-        gbStation.setUserEntity(user);
-        stationRepository.save(gbStation);
-
-        StationEntity ykStation = new StationEntity();
-        ykStation.setCode(ykCode);
-        ykStation.setName(ykName);
-        ykStation.setCity(ykCity);
-        ykStation.setProvince(ykProvince);
-        ykStation.setIsActive(true);
-        ykStation.setUserEntity(user);
-        stationRepository.save(ykStation);
+        StationEntity station = stationRepository.findByCode(bdCode).orElse(null);
 
         UpdateStationRequest request = new UpdateStationRequest();        
         request.setCode(bdCode + "updated");
@@ -1298,7 +1023,7 @@ public class StationControllerTest {
         String mockBearerToken = "Bearer " + mockToken;
 
         mockMvc.perform(
-                patch("/api/stations/" + bdStation.getId())
+                patch("/api/stations/" + station.getId())
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
@@ -1317,14 +1042,7 @@ public class StationControllerTest {
     void testDeleteStationSuccess() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        StationEntity station = new StationEntity();
-        station.setCode(bdCode);
-        station.setName(bdName);
-        station.setCity(bdCity);
-        station.setProvince(bdProvince);
-        station.setIsActive(true);
-        station.setUserEntity(user);
-        stationRepository.save(station);
+        StationEntity station = stationRepository.findByCode(bdCode).orElse(null);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -1358,14 +1076,7 @@ public class StationControllerTest {
     void testDeleteStationBadId() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        StationEntity station = new StationEntity();
-        station.setCode(bdCode);
-        station.setName(bdName);
-        station.setCity(bdCity);
-        station.setProvince(bdProvince);
-        station.setIsActive(true);
-        station.setUserEntity(user);
-        stationRepository.save(station);
+        StationEntity station = stationRepository.findByCode(bdCode).orElse(null);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -1397,16 +1108,7 @@ public class StationControllerTest {
 
     @Test
     void testDeleteStationNotFound() throws Exception {
-        UserEntity user = userRepository.findByEmail(email).orElse(null);
-
-        StationEntity station = new StationEntity();
-        station.setCode(bdCode);
-        station.setName(bdName);
-        station.setCity(bdCity);
-        station.setProvince(bdProvince);
-        station.setIsActive(true);
-        station.setUserEntity(user);
-        stationRepository.save(station);
+        UserEntity user = userRepository.findByEmail(email).orElse(null);        
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -1440,14 +1142,7 @@ public class StationControllerTest {
     void testDeleteStationInvalidToken() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        StationEntity station = new StationEntity();
-        station.setCode(bdCode);
-        station.setName(bdName);
-        station.setCity(bdCity);
-        station.setProvince(bdProvince);
-        station.setIsActive(true);
-        station.setUserEntity(user);
-        stationRepository.save(station);
+        StationEntity station = stationRepository.findByCode(bdCode).orElse(null);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -1481,14 +1176,7 @@ public class StationControllerTest {
     void testDeleteStationTokenExpired() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        StationEntity station = new StationEntity();
-        station.setCode(bdCode);
-        station.setName(bdName);
-        station.setCity(bdCity);
-        station.setProvince(bdProvince);
-        station.setIsActive(true);
-        station.setUserEntity(user);
-        stationRepository.save(station);
+        StationEntity station = stationRepository.findByCode(bdCode).orElse(null);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -1522,14 +1210,7 @@ public class StationControllerTest {
     void testDeleteStationNoToken() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        StationEntity station = new StationEntity();
-        station.setCode(bdCode);
-        station.setName(bdName);
-        station.setCity(bdCity);
-        station.setProvince(bdProvince);
-        station.setIsActive(true);
-        station.setUserEntity(user);
-        stationRepository.save(station);
+        StationEntity station = stationRepository.findByCode(bdCode).orElse(null);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -1565,14 +1246,7 @@ public class StationControllerTest {
         user.setRoles(Collections.singletonList(role));          
         userRepository.save(user);
 
-        StationEntity station = new StationEntity();
-        station.setCode(bdCode);
-        station.setName(bdName);
-        station.setCity(bdCity);
-        station.setProvince(bdProvince);
-        station.setIsActive(true);
-        station.setUserEntity(user);
-        stationRepository.save(station);
+        StationEntity station = stationRepository.findByCode(bdCode).orElse(null);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -1604,18 +1278,7 @@ public class StationControllerTest {
 
     @Test
     void testSearchStationByCode() throws Exception {
-        UserEntity user = userRepository.findByEmail(email).orElse(null);
-
-        for (int i = 0; i < 50; i++) {
-            StationEntity station = new StationEntity();
-            station.setCode(bdCode + i);
-            station.setName(bdName + i);
-            station.setCity(bdCity + i);
-            station.setProvince(bdProvince + i);
-            station.setIsActive(true);
-            station.setUserEntity(user);
-            stationRepository.save(station);
-        }
+        UserEntity user = userRepository.findByEmail(email).orElse(null);        
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -1643,8 +1306,8 @@ public class StationControllerTest {
             });
 
             assertEquals(true, response.getStatus());            
-            assertEquals(10, response.getData().size());
-            assertEquals(5, response.getPaging().getTotalPage());
+            assertEquals(1, response.getData().size());
+            assertEquals(1, response.getPaging().getTotalPage());
             assertEquals(0, response.getPaging().getCurrentPage());
             assertEquals(10, response.getPaging().getSize());
         });        
@@ -1653,17 +1316,6 @@ public class StationControllerTest {
     @Test
     void testSearchStationByName() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
-
-        for (int i = 0; i < 50; i++) {
-            StationEntity station = new StationEntity();
-            station.setCode(bdCode + i);
-            station.setName(bdName + i);
-            station.setCity(bdCity + i);
-            station.setProvince(bdProvince + i);
-            station.setIsActive(true);
-            station.setUserEntity(user);
-            stationRepository.save(station);
-        }
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -1691,8 +1343,8 @@ public class StationControllerTest {
             });
 
             assertEquals(true, response.getStatus());            
-            assertEquals(10, response.getData().size());
-            assertEquals(5, response.getPaging().getTotalPage());
+            assertEquals(1, response.getData().size());
+            assertEquals(1, response.getPaging().getTotalPage());
             assertEquals(0, response.getPaging().getCurrentPage());
             assertEquals(10, response.getPaging().getSize());
         });        
@@ -1701,17 +1353,6 @@ public class StationControllerTest {
     @Test
     void testSearchStationByCity() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
-
-        for (int i = 0; i < 50; i++) {
-            StationEntity station = new StationEntity();
-            station.setCode(bdCode + i);
-            station.setName(bdName + i);
-            station.setCity(bdCity + i);
-            station.setProvince(bdProvince + i);
-            station.setIsActive(true);
-            station.setUserEntity(user);
-            stationRepository.save(station);
-        }
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -1739,8 +1380,8 @@ public class StationControllerTest {
             });
 
             assertEquals(true, response.getStatus());            
-            assertEquals(10, response.getData().size());
-            assertEquals(5, response.getPaging().getTotalPage());
+            assertEquals(2, response.getData().size());
+            assertEquals(1, response.getPaging().getTotalPage());
             assertEquals(0, response.getPaging().getCurrentPage());
             assertEquals(10, response.getPaging().getSize());
         });        
@@ -1749,17 +1390,6 @@ public class StationControllerTest {
     @Test
     void testSearchStationByProvince() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
-
-        for (int i = 0; i < 50; i++) {
-            StationEntity station = new StationEntity();
-            station.setCode(bdCode + i);
-            station.setName(bdName + i);
-            station.setCity(bdCity + i);
-            station.setProvince(bdProvince + i);
-            station.setIsActive(true);
-            station.setUserEntity(user);
-            stationRepository.save(station);
-        }
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -1787,8 +1417,8 @@ public class StationControllerTest {
             });
 
             assertEquals(true, response.getStatus());            
-            assertEquals(10, response.getData().size());
-            assertEquals(5, response.getPaging().getTotalPage());
+            assertEquals(3, response.getData().size());
+            assertEquals(1, response.getPaging().getTotalPage());
             assertEquals(0, response.getPaging().getCurrentPage());
             assertEquals(10, response.getPaging().getSize());
         });        
@@ -1797,17 +1427,6 @@ public class StationControllerTest {
     @Test
     void testSearchStationSuccess() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
-
-        for (int i = 0; i < 50; i++) {
-            StationEntity station = new StationEntity();
-            station.setCode(bdCode + i);
-            station.setName(bdName + i);
-            station.setCity(bdCity + i);
-            station.setProvince(bdProvince + i);
-            station.setIsActive(true);
-            station.setUserEntity(user);
-            stationRepository.save(station);
-        }
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -1835,8 +1454,8 @@ public class StationControllerTest {
             });
 
             assertEquals(true, response.getStatus());            
-            assertEquals(10, response.getData().size());
-            assertEquals(5, response.getPaging().getTotalPage());
+            assertEquals(1, response.getData().size());
+            assertEquals(1, response.getPaging().getTotalPage());
             assertEquals(0, response.getPaging().getCurrentPage());
             assertEquals(10, response.getPaging().getSize());
         });
@@ -1854,8 +1473,8 @@ public class StationControllerTest {
             });
 
             assertEquals(true, response.getStatus());            
-            assertEquals(10, response.getData().size());
-            assertEquals(5, response.getPaging().getTotalPage());
+            assertEquals(1, response.getData().size());
+            assertEquals(1, response.getPaging().getTotalPage());
             assertEquals(0, response.getPaging().getCurrentPage());
             assertEquals(10, response.getPaging().getSize());
         });
@@ -1873,8 +1492,8 @@ public class StationControllerTest {
             });
 
             assertEquals(true, response.getStatus());            
-            assertEquals(10, response.getData().size());
-            assertEquals(5, response.getPaging().getTotalPage());
+            assertEquals(2, response.getData().size());
+            assertEquals(1, response.getPaging().getTotalPage());
             assertEquals(0, response.getPaging().getCurrentPage());
             assertEquals(10, response.getPaging().getSize());
         });
@@ -1892,8 +1511,8 @@ public class StationControllerTest {
             });
 
             assertEquals(true, response.getStatus());            
-            assertEquals(10, response.getData().size());
-            assertEquals(5, response.getPaging().getTotalPage());
+            assertEquals(3, response.getData().size());
+            assertEquals(1, response.getPaging().getTotalPage());
             assertEquals(0, response.getPaging().getCurrentPage());
             assertEquals(10, response.getPaging().getSize());
         });
@@ -1902,17 +1521,6 @@ public class StationControllerTest {
     @Test
     void testSearchStationNotFound() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
-
-        for (int i = 0; i < 50; i++) {
-            StationEntity station = new StationEntity();
-            station.setCode(bdCode + i);
-            station.setName(bdName + i);
-            station.setCity(bdCity + i);
-            station.setProvince(bdProvince + i);
-            station.setIsActive(true);
-            station.setUserEntity(user);
-            stationRepository.save(station);
-        }
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -1951,17 +1559,6 @@ public class StationControllerTest {
     void testSearchStationInvalidToken() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        for (int i = 0; i < 50; i++) {
-            StationEntity station = new StationEntity();
-            station.setCode(bdCode + i);
-            station.setName(bdName + i);
-            station.setCity(bdCity + i);
-            station.setProvince(bdProvince + i);
-            station.setIsActive(true);
-            station.setUserEntity(user);
-            stationRepository.save(station);
-        }
-
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
                                                 email, password)
@@ -1995,17 +1592,6 @@ public class StationControllerTest {
     void testSearchStationTokenExpired() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        for (int i = 0; i < 50; i++) {
-            StationEntity station = new StationEntity();
-            station.setCode(bdCode + i);
-            station.setName(bdName + i);
-            station.setCity(bdCity + i);
-            station.setProvince(bdProvince + i);
-            station.setIsActive(true);
-            station.setUserEntity(user);
-            stationRepository.save(station);
-        }
-
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
                                                 email, password)
@@ -2038,17 +1624,6 @@ public class StationControllerTest {
     @Test
     void testSearchStationNoToken() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
-
-        for (int i = 0; i < 50; i++) {
-            StationEntity station = new StationEntity();
-            station.setCode(bdCode + i);
-            station.setName(bdName + i);
-            station.setCity(bdCity + i);
-            station.setProvince(bdProvince + i);
-            station.setIsActive(true);
-            station.setUserEntity(user);
-            stationRepository.save(station);
-        }
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -2084,17 +1659,6 @@ public class StationControllerTest {
         
         user.setRoles(Collections.singletonList(role));          
         userRepository.save(user);
-
-        for (int i = 0; i < 50; i++) {
-            StationEntity station = new StationEntity();
-            station.setCode(bdCode + i);
-            station.setName(bdName + i);
-            station.setCity(bdCity + i);
-            station.setProvince(bdProvince + i);
-            station.setIsActive(true);
-            station.setUserEntity(user);
-            stationRepository.save(station);
-        }
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
