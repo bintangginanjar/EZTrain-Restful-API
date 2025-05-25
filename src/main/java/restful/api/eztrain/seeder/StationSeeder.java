@@ -23,6 +23,11 @@ public class StationSeeder implements CommandLineRunner {
     @Autowired
     private StationRepository stationRepository;
 
+    public StationSeeder(UserRepository userRepository, StationRepository stationRepository) {
+        this.userRepository = userRepository;
+        this.stationRepository = stationRepository;
+    }
+
     @Override
     public void run(String... args) throws Exception {
         UserEntity adminUser = userRepository.findByEmail("admin@gmail.com").orElse(null);

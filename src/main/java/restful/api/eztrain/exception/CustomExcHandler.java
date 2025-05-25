@@ -10,13 +10,24 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 @RestControllerAdvice
 public class CustomExcHandler {
+
     @ExceptionHandler
     public ResponseEntity<WebResponse<String>> constraintViolationException(ConstraintViolationException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(WebResponse.<String>builder()
+                                            .status(false)
+                                            .errors(exception.getMessage())
+                                            .build());
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<WebResponse<String>> typeMismatchException(MethodArgumentTypeMismatchException exception) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(WebResponse.<String>builder()
                                             .status(false)

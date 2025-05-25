@@ -69,15 +69,7 @@ public class StationService {
     }
 
     @Transactional(readOnly = true)
-    public StationResponse get(String strStationId) {
-        Long stationId;
-
-        try {
-            stationId = Long.parseLong(strStationId);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
-        }
-
+    public StationResponse get(Long stationId) {
         StationEntity station = stationRepository.findById(stationId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Station not found"));
 
@@ -99,15 +91,7 @@ public class StationService {
     }
 
     @Transactional
-    public StationResponse update(Authentication authentication, UpdateStationRequest request, String strStationId) {
-        Long stationId;
-
-        try {
-            stationId = Long.parseLong(strStationId);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
-        }
-
+    public StationResponse update(Authentication authentication, UpdateStationRequest request, Long stationId) {
         UserEntity user = userRepository.findByEmail(authentication.getName())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
@@ -142,15 +126,7 @@ public class StationService {
     }
 
     @Transactional
-    public void delete(String strStationId) {
-        Long stationId;
-
-        try {
-            stationId = Long.parseLong(strStationId);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
-        }
-
+    public void delete(Long stationId) {        
         StationEntity station = stationRepository.findById(stationId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Station not found"));
         

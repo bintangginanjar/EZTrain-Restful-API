@@ -56,7 +56,7 @@ public class StationController {
         produces = MediaType.APPLICATION_JSON_VALUE
     )    
     public WebResponse<StationResponse> get(Authentication authentication, 
-                                        @PathVariable("stationId") String stationId) { 
+                                        @PathVariable("stationId") Long stationId) { 
 
         StationResponse response = stationService.get(stationId);
 
@@ -75,7 +75,7 @@ public class StationController {
     )
     public WebResponse<StationResponse> update(Authentication authentication, 
                                             @RequestBody UpdateStationRequest request,
-                                            @PathVariable("stationId") String stationId) {
+                                            @PathVariable("stationId") Long stationId) {
 
         request.setId(stationId);
         
@@ -94,7 +94,7 @@ public class StationController {
         produces = MediaType.APPLICATION_JSON_VALUE
     )
     public WebResponse<String> delete(Authentication authentication,
-                                            @PathVariable("stationId") String stationId) {
+                                            @PathVariable("stationId") Long stationId) {
 
         stationService.delete(stationId);
 

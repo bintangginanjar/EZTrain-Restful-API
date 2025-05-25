@@ -36,6 +36,7 @@ import restful.api.eztrain.repository.StationRepository;
 import restful.api.eztrain.repository.UserRepository;
 import restful.api.eztrain.security.JwtUtil;
 import restful.api.eztrain.security.SecurityConstants;
+import restful.api.eztrain.seeder.StationSeeder;
 
 @EnableWebMvc
 @SpringBootTest
@@ -55,6 +56,9 @@ public class StationControllerTest {
     private StationRepository stationRepository;
 
     @Autowired
+    private StationSeeder stationSeeder;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -69,14 +73,14 @@ public class StationControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private final String email = "test@gmail.com";
+    private final String email = "admin@gmail.com";
     private final String password = "rahasia";
 
     private final String bdCode = "BDO";
     private final String bdName = "Bandung";
     private final String bdCity = "Bandung";
     private final String bdProvince = "West Java";
-
+    
     private final String gbCode = "GBR";
     private final String gbName = "Gambir";
     private final String gbCity = "Jakarta";
@@ -85,23 +89,24 @@ public class StationControllerTest {
     private final String ykCode = "DIY";
     private final String ykName = "Yogyakarta";
     private final String ykCity = "Yogyakarta";
-    private final String ykProvince = "DI Yogyakarta";    
+    private final String ykProvince = "DI Yogyakarta";
+    
+    private final String bwCode = "BW";
+    private final String bwName = "Banyuwangi";
+    private final String bwCity = "Banyuwangi";
+    private final String bwProvince = "East Java";
 
     @BeforeEach
     void setUp() {                
 
         stationRepository.deleteAll();
-        userRepository.deleteAll();
 
-        RoleEntity role = roleRepository.findByName("ROLE_ADMIN").orElse(null);
-
-        UserEntity user = new UserEntity();
-        user.setEmail(email);
-        user.setPassword(passwordEncoder.encode(password));
-        user.setRoles(Collections.singletonList(role));
-        user.setIsVerified(true);
-        user.setIsActive(true);        
-        userRepository.save(user);
+        try {
+            stationSeeder.run();
+        } catch (Exception e) {            
+            e.printStackTrace();
+        }
+        
     }
 
     @Test
@@ -109,10 +114,10 @@ public class StationControllerTest {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
         RegisterStationRequest request = new RegisterStationRequest();
-        request.setCode(bdCode);
-        request.setName(bdName);
-        request.setCity(bdCity);
-        request.setProvince(bdProvince);
+        request.setCode(bwCode);
+        request.setName(bwName);
+        request.setCity(bwCity);
+        request.setProvince(bwProvince);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -152,9 +157,9 @@ public class StationControllerTest {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
         RegisterStationRequest request = new RegisterStationRequest();
-        request.setCode(bdCode);
-        request.setName(bdName);
-        request.setCity(bdCity);
+        request.setCode(bwCode);
+        request.setName(bwName);
+        request.setCity(bwCity);
         request.setProvince("");
 
         Authentication authentication = authenticationManager.authenticate(
