@@ -1,12 +1,8 @@
 package restful.api.eztrain.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-import java.util.Collections;
-import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,13 +20,10 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import restful.api.eztrain.entity.RoleEntity;
 import restful.api.eztrain.entity.StationEntity;
 import restful.api.eztrain.entity.UserEntity;
 import restful.api.eztrain.model.RegisterRouteRequest;
-import restful.api.eztrain.model.RegisterTrainRequest;
 import restful.api.eztrain.model.RouteResponse;
-import restful.api.eztrain.model.TrainResponse;
 import restful.api.eztrain.model.WebResponse;
 import restful.api.eztrain.repository.RoleRepository;
 import restful.api.eztrain.repository.RouteRepository;
