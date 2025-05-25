@@ -49,7 +49,8 @@ public class UserRoleSeeder implements CommandLineRunner {
             userAdmin.setPassword(passwordEncoder.encode("rahasia"));        
             userAdmin.setRoles(Collections.singletonList(fetchAdminRole));
             userAdmin.setIsVerified(false);
-            userAdmin.setIsActive(false);            
+            userAdmin.setIsActive(false);
+            userRepository.save(userAdmin);            
 
             RoleEntity fetchUserRole = roleRepository.findByName(roleUser).orElseThrow(null);
             UserEntity userUser = new UserEntity();            
@@ -57,9 +58,7 @@ public class UserRoleSeeder implements CommandLineRunner {
             userUser.setPassword(passwordEncoder.encode("rahasia"));        
             userUser.setRoles(Collections.singletonList(fetchUserRole));
             userUser.setIsVerified(false);
-            userUser.setIsActive(false);
-
-            userRepository.save(userAdmin);
+            userUser.setIsActive(false);            
             userRepository.save(userUser);
         }
         
