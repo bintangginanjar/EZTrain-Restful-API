@@ -119,7 +119,7 @@ public class CoachControllerTest {
 
         RegisterCoachRequest request = new RegisterCoachRequest();
         request.setCoachName(eksCoachName);
-        request.setCoachTypeId(Long.toString(coachType.getId()));
+        request.setCoachTypeId(coachType.getId());
         request.setCoachNumber(eksCoachNumber);               
 
         Authentication authentication = authenticationManager.authenticate(
@@ -170,7 +170,7 @@ public class CoachControllerTest {
 
         RegisterCoachRequest request = new RegisterCoachRequest();
         request.setCoachName(eksCoachName);
-        request.setCoachTypeId(Long.toString(coachType.getId()));
+        request.setCoachTypeId(coachType.getId());
         request.setCoachNumber(eksCoachNumber);               
 
         Authentication authentication = authenticationManager.authenticate(
@@ -208,7 +208,7 @@ public class CoachControllerTest {
 
         RegisterCoachRequest request = new RegisterCoachRequest();
         request.setCoachName("");
-        request.setCoachTypeId("");
+        request.setCoachTypeId(null);
         request.setCoachNumber(null);           
 
         Authentication authentication = authenticationManager.authenticate(
@@ -247,7 +247,7 @@ public class CoachControllerTest {
 
         RegisterCoachRequest request = new RegisterCoachRequest();
         request.setCoachName(eksCoachName);
-        request.setCoachTypeId(Long.toString(coachType.getId()));
+        request.setCoachTypeId(coachType.getId());
         request.setCoachNumber(eksCoachNumber);               
 
         Authentication authentication = authenticationManager.authenticate(
@@ -286,7 +286,7 @@ public class CoachControllerTest {
 
         RegisterCoachRequest request = new RegisterCoachRequest();
         request.setCoachName(eksCoachName);
-        request.setCoachTypeId(Long.toString(coachType.getId()));
+        request.setCoachTypeId(coachType.getId());
         request.setCoachNumber(eksCoachNumber);               
 
         Authentication authentication = authenticationManager.authenticate(
@@ -325,7 +325,7 @@ public class CoachControllerTest {
 
         RegisterCoachRequest request = new RegisterCoachRequest();
         request.setCoachName(eksCoachName);
-        request.setCoachTypeId(Long.toString(coachType.getId()));
+        request.setCoachTypeId(coachType.getId());
         request.setCoachNumber(eksCoachNumber);               
 
         Authentication authentication = authenticationManager.authenticate(
@@ -367,7 +367,7 @@ public class CoachControllerTest {
 
         RegisterCoachRequest request = new RegisterCoachRequest();
         request.setCoachName(eksCoachName);
-        request.setCoachTypeId(Long.toString(coachType.getId()));
+        request.setCoachTypeId(coachType.getId());
         request.setCoachNumber(eksCoachNumber);               
 
         Authentication authentication = authenticationManager.authenticate(
@@ -716,7 +716,7 @@ public class CoachControllerTest {
 
         UpdateCoachRequest request = new UpdateCoachRequest();
         request.setCoachName(eksCoachName + " updated");
-        request.setCoachTypeId(Long.toString(coachType.getId()));
+        request.setCoachTypeId(coachType.getId());
         request.setCoachNumber(eksCoachNumber + 10);   
 
         Authentication authentication = authenticationManager.authenticate(
@@ -777,7 +777,7 @@ public class CoachControllerTest {
 
         UpdateCoachRequest request = new UpdateCoachRequest();
         request.setCoachName(panCoachName);
-        request.setCoachTypeId(Long.toString(panoramicCoach.getId()));
+        request.setCoachTypeId(panoramicCoach.getId());
         request.setCoachNumber(eksCoachNumber + 10);   
 
         Authentication authentication = authenticationManager.authenticate(
@@ -825,7 +825,7 @@ public class CoachControllerTest {
 
         UpdateCoachRequest request = new UpdateCoachRequest();
         request.setCoachName(eksCoachName + " updated");
-        request.setCoachTypeId(Long.toString(coachType.getId()));
+        request.setCoachTypeId(coachType.getId());
         request.setCoachNumber(eksCoachNumber + 10);   
 
         Authentication authentication = authenticationManager.authenticate(
@@ -873,7 +873,7 @@ public class CoachControllerTest {
 
         UpdateCoachRequest request = new UpdateCoachRequest();
         request.setCoachName(eksCoachName + " updated");
-        request.setCoachTypeId(Long.toString(coachType.getId()));
+        request.setCoachTypeId(coachType.getId());
         request.setCoachNumber(eksCoachNumber + 10);   
 
         Authentication authentication = authenticationManager.authenticate(
@@ -921,7 +921,7 @@ public class CoachControllerTest {
 
         UpdateCoachRequest request = new UpdateCoachRequest();
         request.setCoachName(eksCoachName + " updated");
-        request.setCoachTypeId(Long.toString(coachType.getId()));
+        request.setCoachTypeId(coachType.getId());
         request.setCoachNumber(eksCoachNumber + 10);   
 
         Authentication authentication = authenticationManager.authenticate(
@@ -969,7 +969,7 @@ public class CoachControllerTest {
 
         UpdateCoachRequest request = new UpdateCoachRequest();
         request.setCoachName(eksCoachName + " updated");
-        request.setCoachTypeId(Long.toString(coachType.getId()));
+        request.setCoachTypeId(coachType.getId());
         request.setCoachNumber(eksCoachNumber + 10);   
 
         Authentication authentication = authenticationManager.authenticate(
@@ -1017,7 +1017,7 @@ public class CoachControllerTest {
 
         UpdateCoachRequest request = new UpdateCoachRequest();
         request.setCoachName(eksCoachName + " updated");
-        request.setCoachTypeId(Long.toString(coachType.getId()));
+        request.setCoachTypeId(coachType.getId());
         request.setCoachNumber(eksCoachNumber + 10);   
 
         Authentication authentication = authenticationManager.authenticate(
@@ -1067,7 +1067,7 @@ public class CoachControllerTest {
 
         UpdateCoachRequest request = new UpdateCoachRequest();
         request.setCoachName(eksCoachName + " updated");
-        request.setCoachTypeId(Long.toString(coachType.getId()));
+        request.setCoachTypeId(coachType.getId());
         request.setCoachNumber(eksCoachNumber + 10);   
 
         Authentication authentication = authenticationManager.authenticate(
