@@ -16,7 +16,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
@@ -36,10 +35,11 @@ import restful.api.eztrain.repository.CoachRepository;
 import restful.api.eztrain.repository.CoachTypeRepository;
 import restful.api.eztrain.repository.RoleRepository;
 import restful.api.eztrain.repository.SeatRepository;
-import restful.api.eztrain.repository.TrainRepository;
 import restful.api.eztrain.repository.UserRepository;
 import restful.api.eztrain.security.JwtUtil;
 import restful.api.eztrain.security.SecurityConstants;
+import restful.api.eztrain.seeder.CoachSeeder;
+import restful.api.eztrain.seeder.SeatSeeder;
 
 @EnableWebMvc
 @SpringBootTest
@@ -56,19 +56,13 @@ public class CoachControllerTest {
     private RoleRepository roleRepository;
 
     @Autowired
-    private TrainRepository trainRepository;
-
-    @Autowired
     private CoachRepository coachRepository; 
     
     @Autowired
     private CoachTypeRepository coachTypeRepository;
 
     @Autowired
-    private SeatRepository seatRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private SeatRepository seatRepository;    
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -80,36 +74,44 @@ public class CoachControllerTest {
     private SecurityConstants securityConstants;
 
     @Autowired
+    private CoachSeeder coachSeeder;
+
+    @Autowired
+    private SeatSeeder seatSeeder;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
-    private final String email = "test@gmail.com";
+    private final String email = "admin@gmail.com";
     private final String password = "rahasia";
 
     private final String eksCoachName = "Eksekutif 1";
     private final Integer eksCoachNumber = 1;
     private final String eksCoachType = "Eksekutif";
 
-    private final String panCoachName = "Panomaric 1";
-    private final Integer panCoachNumber = 1;
+    private final String panCoachName = "Panoramic 1";
+    //private final Integer panCoachNumber = 1;
     private final String panCoachType = "Panoramic";
 
     @BeforeEach
     void setUp() {                
-                
-        trainRepository.deleteAll();
+                        
         coachRepository.deleteAll();
-        seatRepository.deleteAll();
-        userRepository.deleteAll();
+
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
 
         RoleEntity role = roleRepository.findByName("ROLE_ADMIN").orElse(null);
+        
+        user.setRoles(Collections.singletonList(role));          
+        userRepository.save(user);
 
-        UserEntity user = new UserEntity();
-        user.setEmail(email);
-        user.setPassword(passwordEncoder.encode(password));
-        user.setRoles(Collections.singletonList(role));
-        user.setIsVerified(true);
-        user.setIsActive(true);        
-        userRepository.save(user);        
+        try {
+            seatSeeder.run();
+            coachSeeder.run();
+        } catch (Exception e) {            
+            e.printStackTrace();
+        }
+
     }
 
     @Test
@@ -118,9 +120,9 @@ public class CoachControllerTest {
         CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
 
         RegisterCoachRequest request = new RegisterCoachRequest();
-        request.setCoachName(eksCoachName);
+        request.setCoachName("Eksekutif 6");
         request.setCoachTypeId(coachType.getId());
-        request.setCoachNumber(eksCoachNumber);               
+        request.setCoachNumber(6);               
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -150,23 +152,16 @@ public class CoachControllerTest {
             assertEquals(true, response.getStatus());
             assertEquals(request.getCoachName(), response.getData().getCoachName());
             assertEquals(request.getCoachNumber(), response.getData().getCoachNumber());
-            assertEquals(request.getCoachTypeId(), Long.toString(response.getData().getCoachTypeId()));
+            assertEquals(request.getCoachTypeId(), response.getData().getCoachTypeId());
             assertEquals(coachType.getName(), response.getData().getCoachTypeName());
         });
     }
 
     @Test
     void testRegisterCoachDuplicate() throws Exception {
-        UserEntity user = userRepository.findByEmail(email).orElse(null);
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
+        UserEntity user = userRepository.findByEmail(email).orElse(null);        
 
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
+        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
 
         RegisterCoachRequest request = new RegisterCoachRequest();
         request.setCoachName(eksCoachName);
@@ -403,15 +398,7 @@ public class CoachControllerTest {
     void testGetCoachSuccess() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
-
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -441,8 +428,8 @@ public class CoachControllerTest {
             assertEquals(coach.getId(), response.getData().getId());            
             assertEquals(coach.getCoachName(), response.getData().getCoachName());
             assertEquals(coach.getCoachNumber(), response.getData().getCoachNumber());
-            assertEquals(coachType.getId(), response.getData().getCoachTypeId());
-            assertEquals(coachType.getName(), response.getData().getCoachTypeName());
+            assertEquals(coach.getCoachTypeEntity().getId(), response.getData().getCoachTypeId());
+            assertEquals(coach.getCoachTypeEntity().getName(), response.getData().getCoachTypeName());
         });
     }
 
@@ -450,15 +437,7 @@ public class CoachControllerTest {
     void testGetCoachBadId() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
-
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -490,17 +469,7 @@ public class CoachControllerTest {
 
     @Test
     void testGetCoachNotFound() throws Exception {
-        UserEntity user = userRepository.findByEmail(email).orElse(null);
-
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
-
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
+        UserEntity user = userRepository.findByEmail(email).orElse(null);        
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -534,15 +503,7 @@ public class CoachControllerTest {
     void testGetCoachInvalidToken() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
-
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -576,15 +537,7 @@ public class CoachControllerTest {
     void testGetCoachTokenExpired() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
-
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -618,15 +571,7 @@ public class CoachControllerTest {
     void testGetCoachNoToken() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
-
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -662,15 +607,7 @@ public class CoachControllerTest {
         user.setRoles(Collections.singletonList(role));          
         userRepository.save(user);
 
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
-
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -706,13 +643,7 @@ public class CoachControllerTest {
 
         CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
 
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
         UpdateCoachRequest request = new UpdateCoachRequest();
         request.setCoachName(eksCoachName + " updated");
@@ -747,7 +678,7 @@ public class CoachControllerTest {
             assertEquals(true, response.getStatus());
             assertEquals(request.getCoachName(), response.getData().getCoachName());
             assertEquals(request.getCoachNumber(), response.getData().getCoachNumber());
-            assertEquals(request.getCoachTypeId(), Long.toString(response.getData().getCoachTypeId()));
+            assertEquals(request.getCoachTypeId(), response.getData().getCoachTypeId());
             assertEquals(coachType.getName(), response.getData().getCoachTypeName());
         });
     }
@@ -755,25 +686,10 @@ public class CoachControllerTest {
     @Test
     void testUpdateCoachDuplicate() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
-
-        CoachTypeEntity eksekutifCoach = coachTypeRepository.findByName(eksCoachType).orElse(null);
+        
         CoachTypeEntity panoramicCoach = coachTypeRepository.findByName(panCoachType).orElse(null);
 
-        CoachEntity eksCoach = new CoachEntity();
-        eksCoach.setCoachName(eksCoachName);
-        eksCoach.setCoachNumber(eksCoachNumber);
-        eksCoach.setCoachTypeEntity(eksekutifCoach);
-        eksCoach.setIsActive(true);
-        eksCoach.setUserEntity(user);
-        coachRepository.save(eksCoach);
-
-        CoachEntity panCoach = new CoachEntity();
-        panCoach.setCoachName(panCoachName);
-        panCoach.setCoachNumber(panCoachNumber);
-        panCoach.setCoachTypeEntity(panoramicCoach);
-        panCoach.setIsActive(true);
-        panCoach.setUserEntity(user);
-        coachRepository.save(panCoach);
+        CoachEntity eksCoach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
         UpdateCoachRequest request = new UpdateCoachRequest();
         request.setCoachName(panCoachName);
@@ -815,13 +731,7 @@ public class CoachControllerTest {
 
         CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
 
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
         UpdateCoachRequest request = new UpdateCoachRequest();
         request.setCoachName(eksCoachName + " updated");
@@ -859,17 +769,9 @@ public class CoachControllerTest {
 
     @Test
     void testUpdateCoachNotFound() throws Exception {
-        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        UserEntity user = userRepository.findByEmail(email).orElse(null);        
 
         CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
-
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
 
         UpdateCoachRequest request = new UpdateCoachRequest();
         request.setCoachName(eksCoachName + " updated");
@@ -911,13 +813,7 @@ public class CoachControllerTest {
 
         CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
 
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
         UpdateCoachRequest request = new UpdateCoachRequest();
         request.setCoachName(eksCoachName + " updated");
@@ -959,13 +855,7 @@ public class CoachControllerTest {
 
         CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
 
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
         UpdateCoachRequest request = new UpdateCoachRequest();
         request.setCoachName(eksCoachName + " updated");
@@ -1007,13 +897,7 @@ public class CoachControllerTest {
 
         CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
 
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
         UpdateCoachRequest request = new UpdateCoachRequest();
         request.setCoachName(eksCoachName + " updated");
@@ -1057,13 +941,7 @@ public class CoachControllerTest {
 
         CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
 
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
         UpdateCoachRequest request = new UpdateCoachRequest();
         request.setCoachName(eksCoachName + " updated");
@@ -1100,18 +978,10 @@ public class CoachControllerTest {
     }
 
     @Test
-    void testDeletCoachSuccess() throws Exception {
-        UserEntity user = userRepository.findByEmail(email).orElse(null);
+    void testDeleteCoachSuccess() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);        
 
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
-
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -1142,18 +1012,10 @@ public class CoachControllerTest {
     }
 
     @Test
-    void testDeletCoachBadId() throws Exception {
+    void testDeleteCoachBadId() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
-
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -1184,18 +1046,8 @@ public class CoachControllerTest {
     }
 
     @Test
-    void testDeletCoachNotFound() throws Exception {
-        UserEntity user = userRepository.findByEmail(email).orElse(null);
-
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
-
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
+    void testDeleteCoachNotFound() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);        
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -1226,18 +1078,10 @@ public class CoachControllerTest {
     }
 
     @Test
-    void testDeletCoachInvalidToken() throws Exception {
+    void testDeleteCoachInvalidToken() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
-
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -1268,18 +1112,10 @@ public class CoachControllerTest {
     }
 
     @Test
-    void testDeletCoachTokenExpired() throws Exception {
+    void testDeleteCoachTokenExpired() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
-
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -1310,18 +1146,10 @@ public class CoachControllerTest {
     }
 
     @Test
-    void testDeletCoachNoToken() throws Exception {
-        UserEntity user = userRepository.findByEmail(email).orElse(null);
+    void testDeleteCoachNoToken() throws Exception {
+        UserEntity user = userRepository.findByEmail(email).orElse(null);        
 
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
-
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -1349,7 +1177,7 @@ public class CoachControllerTest {
     }
 
     @Test
-    void testDeletCoachBadRole() throws Exception {
+    void testDeleteCoachBadRole() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
         RoleEntity role = roleRepository.findByName("ROLE_USER").orElse(null);
@@ -1357,15 +1185,7 @@ public class CoachControllerTest {
         user.setRoles(Collections.singletonList(role));          
         userRepository.save(user);
 
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
-
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -1397,19 +1217,7 @@ public class CoachControllerTest {
 
     @Test
     void testGetAllCoachSuccess() throws Exception {
-        UserEntity user = userRepository.findByEmail(email).orElse(null);
-
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
-
-        for (int i = 0; i < 50; i++) {
-            CoachEntity coach = new CoachEntity();
-            coach.setCoachName(eksCoachName + i);
-            coach.setCoachNumber(eksCoachNumber + i);
-            coach.setCoachTypeEntity(coachType);
-            coach.setIsActive(true);
-            coach.setUserEntity(user);
-            coachRepository.save(coach);
-        }        
+        UserEntity user = userRepository.findByEmail(email).orElse(null);        
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -1437,7 +1245,7 @@ public class CoachControllerTest {
 
             assertEquals(true, response.getStatus());
             assertEquals(10, response.getData().size());
-            assertEquals(5, response.getPaging().getTotalPage());
+            assertEquals(2, response.getPaging().getTotalPage());
             assertEquals(0, response.getPaging().getCurrentPage());
             assertEquals(10, response.getPaging().getSize());
         });        
@@ -1445,19 +1253,7 @@ public class CoachControllerTest {
     
     @Test
     void testGetAllCoachInvalidToken() throws Exception {
-        UserEntity user = userRepository.findByEmail(email).orElse(null);
-
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
-
-        for (int i = 0; i < 50; i++) {
-            CoachEntity coach = new CoachEntity();
-            coach.setCoachName(eksCoachName + i);
-            coach.setCoachNumber(eksCoachNumber + i);
-            coach.setCoachTypeEntity(coachType);
-            coach.setIsActive(true);
-            coach.setUserEntity(user);
-            coachRepository.save(coach);
-        }        
+        UserEntity user = userRepository.findByEmail(email).orElse(null);        
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -1489,19 +1285,7 @@ public class CoachControllerTest {
     
     @Test
     void testGetAllCoachTokenExpired() throws Exception {
-        UserEntity user = userRepository.findByEmail(email).orElse(null);
-
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
-
-        for (int i = 0; i < 50; i++) {
-            CoachEntity coach = new CoachEntity();
-            coach.setCoachName(eksCoachName + i);
-            coach.setCoachNumber(eksCoachNumber + i);
-            coach.setCoachTypeEntity(coachType);
-            coach.setIsActive(true);
-            coach.setUserEntity(user);
-            coachRepository.save(coach);
-        }        
+        UserEntity user = userRepository.findByEmail(email).orElse(null);        
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -1533,19 +1317,7 @@ public class CoachControllerTest {
 
     @Test
     void testGetAllCoachNoToken() throws Exception {
-        UserEntity user = userRepository.findByEmail(email).orElse(null);
-
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
-
-        for (int i = 0; i < 50; i++) {
-            CoachEntity coach = new CoachEntity();
-            coach.setCoachName(eksCoachName + i);
-            coach.setCoachNumber(eksCoachNumber + i);
-            coach.setCoachTypeEntity(coachType);
-            coach.setIsActive(true);
-            coach.setUserEntity(user);
-            coachRepository.save(coach);
-        }        
+        UserEntity user = userRepository.findByEmail(email).orElse(null);        
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -1579,19 +1351,7 @@ public class CoachControllerTest {
         RoleEntity role = roleRepository.findByName("ROLE_USER").orElse(null);
         
         user.setRoles(Collections.singletonList(role));          
-        userRepository.save(user);
-
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
-
-        for (int i = 0; i < 50; i++) {
-            CoachEntity coach = new CoachEntity();
-            coach.setCoachName(eksCoachName + i);
-            coach.setCoachNumber(eksCoachNumber + i);
-            coach.setCoachTypeEntity(coachType);
-            coach.setIsActive(true);
-            coach.setUserEntity(user);
-            coachRepository.save(coach);
-        }        
+        userRepository.save(user);        
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -1623,19 +1383,7 @@ public class CoachControllerTest {
     
     @Test
     void testSearchCoachByName() throws Exception {
-        UserEntity user = userRepository.findByEmail(email).orElse(null);
-
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
-
-        for (int i = 0; i < 50; i++) {
-            CoachEntity coach = new CoachEntity();
-            coach.setCoachName(eksCoachName + i);
-            coach.setCoachNumber(eksCoachNumber + i);
-            coach.setCoachTypeEntity(coachType);
-            coach.setIsActive(true);
-            coach.setUserEntity(user);
-            coachRepository.save(coach);
-        }        
+        UserEntity user = userRepository.findByEmail(email).orElse(null);            
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -1663,8 +1411,8 @@ public class CoachControllerTest {
             });
 
             assertEquals(true, response.getStatus());
-            assertEquals(10, response.getData().size());
-            assertEquals(5, response.getPaging().getTotalPage());
+            assertEquals(5, response.getData().size());
+            assertEquals(1, response.getPaging().getTotalPage());
             assertEquals(0, response.getPaging().getCurrentPage());
             assertEquals(10, response.getPaging().getSize());
         });        
@@ -1672,19 +1420,7 @@ public class CoachControllerTest {
 
     @Test
     void testSearchCoachNotFound() throws Exception {
-        UserEntity user = userRepository.findByEmail(email).orElse(null);
-
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
-
-        for (int i = 0; i < 50; i++) {
-            CoachEntity coach = new CoachEntity();
-            coach.setCoachName(eksCoachName + i);
-            coach.setCoachNumber(eksCoachNumber + i);
-            coach.setCoachTypeEntity(coachType);
-            coach.setIsActive(true);
-            coach.setUserEntity(user);
-            coachRepository.save(coach);
-        }        
+        UserEntity user = userRepository.findByEmail(email).orElse(null);     
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -1701,7 +1437,7 @@ public class CoachControllerTest {
 
         mockMvc.perform(
                 get("/api/coaches/search")
-                        .queryParam("coachName", "Pan")
+                        .queryParam("coachName", "Ekonomi")
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)                        
                         .header("Authorization", mockBearerToken)                        
@@ -1721,19 +1457,7 @@ public class CoachControllerTest {
     
     @Test
     void testSearchCoachInvalidToken() throws Exception {
-        UserEntity user = userRepository.findByEmail(email).orElse(null);
-
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
-
-        for (int i = 0; i < 50; i++) {
-            CoachEntity coach = new CoachEntity();
-            coach.setCoachName(eksCoachName + i);
-            coach.setCoachNumber(eksCoachNumber + i);
-            coach.setCoachTypeEntity(coachType);
-            coach.setIsActive(true);
-            coach.setUserEntity(user);
-            coachRepository.save(coach);
-        }        
+        UserEntity user = userRepository.findByEmail(email).orElse(null);      
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -1766,19 +1490,7 @@ public class CoachControllerTest {
 
     @Test
     void testSearchCoachByTokenExpired() throws Exception {
-        UserEntity user = userRepository.findByEmail(email).orElse(null);
-
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
-
-        for (int i = 0; i < 50; i++) {
-            CoachEntity coach = new CoachEntity();
-            coach.setCoachName(eksCoachName + i);
-            coach.setCoachNumber(eksCoachNumber + i);
-            coach.setCoachTypeEntity(coachType);
-            coach.setIsActive(true);
-            coach.setUserEntity(user);
-            coachRepository.save(coach);
-        }        
+        UserEntity user = userRepository.findByEmail(email).orElse(null);       
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -1811,19 +1523,7 @@ public class CoachControllerTest {
 
     @Test
     void testSearchCoachNoToken() throws Exception {
-        UserEntity user = userRepository.findByEmail(email).orElse(null);
-
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
-
-        for (int i = 0; i < 50; i++) {
-            CoachEntity coach = new CoachEntity();
-            coach.setCoachName(eksCoachName + i);
-            coach.setCoachNumber(eksCoachNumber + i);
-            coach.setCoachTypeEntity(coachType);
-            coach.setIsActive(true);
-            coach.setUserEntity(user);
-            coachRepository.save(coach);
-        }        
+        UserEntity user = userRepository.findByEmail(email).orElse(null);      
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -1852,25 +1552,13 @@ public class CoachControllerTest {
     }
 
     @Test
-    void testSearchCoachByBadRole() throws Exception {
+    void testSearchCoachBadRole() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
         RoleEntity role = roleRepository.findByName("ROLE_NOT_FOUND").orElse(null);
         
         user.setRoles(Collections.singletonList(role));          
-        userRepository.save(user);
-
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);
-
-        for (int i = 0; i < 50; i++) {
-            CoachEntity coach = new CoachEntity();
-            coach.setCoachName(eksCoachName + i);
-            coach.setCoachNumber(eksCoachNumber + i);
-            coach.setCoachTypeEntity(coachType);
-            coach.setIsActive(true);
-            coach.setUserEntity(user);
-            coachRepository.save(coach);
-        }        
+        userRepository.save(user);       
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -1903,22 +1591,11 @@ public class CoachControllerTest {
 
     @Test
     void testAssignSeatToCoachSuccess() throws Exception {
-        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        UserEntity user = userRepository.findByEmail(email).orElse(null);        
 
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);        
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
-
-        SeatEntity seat = new SeatEntity();
-        seat.setSeatNumber("11A");
-        seat.setUserEntity(user);
-        seatRepository.save(seat);
+        SeatEntity seat = seatRepository.findBySeatNumber("1A").orElse(null);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -1948,30 +1625,19 @@ public class CoachControllerTest {
             assertEquals(coach.getId(), response.getData().getId());            
             assertEquals(coach.getCoachName(), response.getData().getCoachName());
             assertEquals(coach.getCoachNumber(), response.getData().getCoachNumber());
-            assertEquals(coachType.getId(), response.getData().getCoachTypeId());
-            assertEquals(coachType.getName(), response.getData().getCoachTypeName());
+            assertEquals(coach.getCoachTypeEntity().getId(), response.getData().getCoachTypeId());
+            assertEquals(coach.getCoachTypeEntity().getName(), response.getData().getCoachTypeName());
             assertNotEquals(0, response.getData().getSeats().size());
         });        
     }
 
     @Test
     void testAssignSeatBadIdToCoach() throws Exception {
-        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        UserEntity user = userRepository.findByEmail(email).orElse(null);        
 
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);        
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
-
-        SeatEntity seat = new SeatEntity();
-        seat.setSeatNumber("11A");
-        seat.setUserEntity(user);
-        seatRepository.save(seat);
+        SeatEntity seat = seatRepository.findBySeatNumber("1A").orElse(null);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -2003,22 +1669,9 @@ public class CoachControllerTest {
 
     @Test
     void testAssignSeatNotFoundToCoach() throws Exception {
-        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        UserEntity user = userRepository.findByEmail(email).orElse(null);                
 
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);        
-
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
-
-        SeatEntity seat = new SeatEntity();
-        seat.setSeatNumber("11A");
-        seat.setUserEntity(user);
-        seatRepository.save(seat);
+        SeatEntity seat = seatRepository.findBySeatNumber("1A").orElse(null);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -2050,22 +1703,11 @@ public class CoachControllerTest {
 
     @Test
     void testAssignSeatToCoachBadId() throws Exception {
-        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        UserEntity user = userRepository.findByEmail(email).orElse(null);        
 
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);        
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
-
-        SeatEntity seat = new SeatEntity();
-        seat.setSeatNumber("11A");
-        seat.setUserEntity(user);
-        seatRepository.save(seat);
+        SeatEntity seat = seatRepository.findBySeatNumber("1A").orElse(null);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -2097,22 +1739,9 @@ public class CoachControllerTest {
 
     @Test
     void testAssignSeatToCoachNotFound() throws Exception {
-        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        UserEntity user = userRepository.findByEmail(email).orElse(null);        
 
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);        
-
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
-
-        SeatEntity seat = new SeatEntity();
-        seat.setSeatNumber("11A");
-        seat.setUserEntity(user);
-        seatRepository.save(seat);
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);        
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -2144,22 +1773,11 @@ public class CoachControllerTest {
 
     @Test
     void testAssignSeatToCoachInvalidToken() throws Exception {
-        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        UserEntity user = userRepository.findByEmail(email).orElse(null);        
 
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);        
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
-
-        SeatEntity seat = new SeatEntity();
-        seat.setSeatNumber("11A");
-        seat.setUserEntity(user);
-        seatRepository.save(seat);
+        SeatEntity seat = seatRepository.findBySeatNumber("1A").orElse(null);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -2191,22 +1809,11 @@ public class CoachControllerTest {
 
     @Test
     void testAssignSeatToCoachTokenExpired() throws Exception {
-        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        UserEntity user = userRepository.findByEmail(email).orElse(null);        
 
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);        
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
-
-        SeatEntity seat = new SeatEntity();
-        seat.setSeatNumber("11A");
-        seat.setUserEntity(user);
-        seatRepository.save(seat);
+        SeatEntity seat = seatRepository.findBySeatNumber("1A").orElse(null);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -2238,22 +1845,11 @@ public class CoachControllerTest {
 
     @Test
     void testAssignSeatToCoachNoToken() throws Exception {
-        UserEntity user = userRepository.findByEmail(email).orElse(null);
+        UserEntity user = userRepository.findByEmail(email).orElse(null);        
 
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);        
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
-
-        SeatEntity seat = new SeatEntity();
-        seat.setSeatNumber("11A");
-        seat.setUserEntity(user);
-        seatRepository.save(seat);
+        SeatEntity seat = seatRepository.findBySeatNumber("1A").orElse(null);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -2289,20 +1885,9 @@ public class CoachControllerTest {
         user.setRoles(Collections.singletonList(role));          
         userRepository.save(user);
 
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);        
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
-
-        SeatEntity seat = new SeatEntity();
-        seat.setSeatNumber("11A");
-        seat.setUserEntity(user);
-        seatRepository.save(seat);
+        SeatEntity seat = seatRepository.findBySeatNumber("1A").orElse(null);
 
         Authentication authentication = authenticationManager.authenticate(
                                             new UsernamePasswordAuthenticationToken(
@@ -2333,23 +1918,12 @@ public class CoachControllerTest {
     }
 
     @Test
-    void testRemoveSeatToCoachSuccess() throws Exception {
+    void testRemoveSeatFromCoachSuccess() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);        
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
-
-        SeatEntity seat = new SeatEntity();
-        seat.setSeatNumber("11A");
-        seat.setUserEntity(user);
-        seatRepository.save(seat);
+        SeatEntity seat = seatRepository.findBySeatNumber("1A").orElse(null);
 
         coach.getSeats().add(seat);
         coachRepository.save(coach);
@@ -2382,30 +1956,19 @@ public class CoachControllerTest {
             assertEquals(coach.getId(), response.getData().getId());            
             assertEquals(coach.getCoachName(), response.getData().getCoachName());
             assertEquals(coach.getCoachNumber(), response.getData().getCoachNumber());
-            assertEquals(coachType.getId(), response.getData().getCoachTypeId());
-            assertEquals(coachType.getName(), response.getData().getCoachTypeName());
+            assertEquals(coach.getCoachTypeEntity().getId(), response.getData().getCoachTypeId());
+            assertEquals(coach.getCoachTypeEntity().getName(), response.getData().getCoachTypeName());
             assertEquals(0, response.getData().getSeats().size());
         });        
     }
 
     @Test
-    void testRemoveSeatBadIdToCoach() throws Exception {
+    void testRemoveSeatBadIdFromCoach() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);        
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
-
-        SeatEntity seat = new SeatEntity();
-        seat.setSeatNumber("11A");
-        seat.setUserEntity(user);
-        seatRepository.save(seat);
+        SeatEntity seat = seatRepository.findBySeatNumber("1A").orElse(null);
 
         coach.getSeats().add(seat);
         coachRepository.save(coach);
@@ -2439,23 +2002,12 @@ public class CoachControllerTest {
     }
 
     @Test
-    void testRemoveSeatNotFoundToCoach() throws Exception {
+    void testRemoveSeatNotFoundFromCoach() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);        
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
-
-        SeatEntity seat = new SeatEntity();
-        seat.setSeatNumber("11A");
-        seat.setUserEntity(user);
-        seatRepository.save(seat);
+        SeatEntity seat = seatRepository.findBySeatNumber("1A").orElse(null);
 
         coach.getSeats().add(seat);
         coachRepository.save(coach);
@@ -2489,23 +2041,12 @@ public class CoachControllerTest {
     }
 
     @Test
-    void testRemoveSeatToCoachBadId() throws Exception {
+    void testRemoveSeatFromCoachBadId() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);        
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
-
-        SeatEntity seat = new SeatEntity();
-        seat.setSeatNumber("11A");
-        seat.setUserEntity(user);
-        seatRepository.save(seat);
+        SeatEntity seat = seatRepository.findBySeatNumber("1A").orElse(null);
 
         coach.getSeats().add(seat);
         coachRepository.save(coach);
@@ -2539,23 +2080,12 @@ public class CoachControllerTest {
     }
 
     @Test
-    void testRemoveSeatToCoachNotFound() throws Exception {
+    void testRemoveSeatFromCoachNotFound() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);        
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
-
-        SeatEntity seat = new SeatEntity();
-        seat.setSeatNumber("11A");
-        seat.setUserEntity(user);
-        seatRepository.save(seat);
+        SeatEntity seat = seatRepository.findBySeatNumber("1A").orElse(null);
 
         coach.getSeats().add(seat);
         coachRepository.save(coach);
@@ -2589,23 +2119,12 @@ public class CoachControllerTest {
     }
 
     @Test
-    void testRemoveSeatToCoachInvalidToken() throws Exception {
+    void testRemoveSeatFromCoachInvalidToken() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);        
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
-
-        SeatEntity seat = new SeatEntity();
-        seat.setSeatNumber("11A");
-        seat.setUserEntity(user);
-        seatRepository.save(seat);
+        SeatEntity seat = seatRepository.findBySeatNumber("1A").orElse(null);
 
         coach.getSeats().add(seat);
         coachRepository.save(coach);
@@ -2639,23 +2158,12 @@ public class CoachControllerTest {
     }
 
     @Test
-    void testRemoveSeatToCoachTokenExpired() throws Exception {
+    void testRemoveSeatFromCoachTokenExpired() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);        
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
-
-        SeatEntity seat = new SeatEntity();
-        seat.setSeatNumber("11A");
-        seat.setUserEntity(user);
-        seatRepository.save(seat);
+        SeatEntity seat = seatRepository.findBySeatNumber("1A").orElse(null);
 
         coach.getSeats().add(seat);
         coachRepository.save(coach);
@@ -2689,23 +2197,12 @@ public class CoachControllerTest {
     }
 
     @Test
-    void testRemoveSeatToCoachNoToken() throws Exception {
+    void testRemoveSeatFromCoachNoToken() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);        
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
-
-        SeatEntity seat = new SeatEntity();
-        seat.setSeatNumber("11A");
-        seat.setUserEntity(user);
-        seatRepository.save(seat);
+        SeatEntity seat = seatRepository.findBySeatNumber("1A").orElse(null);
 
         coach.getSeats().add(seat);
         coachRepository.save(coach);
@@ -2736,7 +2233,7 @@ public class CoachControllerTest {
     }
 
     @Test
-    void testRemoveSeatToCoachBadRole() throws Exception {
+    void testRemoveSeatFromCoachBadRole() throws Exception {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
         RoleEntity role = roleRepository.findByName("ROLE_USER").orElse(null);
@@ -2744,20 +2241,9 @@ public class CoachControllerTest {
         user.setRoles(Collections.singletonList(role));          
         userRepository.save(user);
 
-        CoachTypeEntity coachType = coachTypeRepository.findByName(eksCoachType).orElse(null);        
+        CoachEntity coach = coachRepository.findByCoachName(eksCoachName).orElse(null);
 
-        CoachEntity coach = new CoachEntity();
-        coach.setCoachName(eksCoachName);
-        coach.setCoachNumber(eksCoachNumber);
-        coach.setCoachTypeEntity(coachType);
-        coach.setIsActive(true);
-        coach.setUserEntity(user);
-        coachRepository.save(coach);
-
-        SeatEntity seat = new SeatEntity();
-        seat.setSeatNumber("11A");
-        seat.setUserEntity(user);
-        seatRepository.save(seat);
+        SeatEntity seat = seatRepository.findBySeatNumber("1A").orElse(null);
 
         coach.getSeats().add(seat);
         coachRepository.save(coach);
