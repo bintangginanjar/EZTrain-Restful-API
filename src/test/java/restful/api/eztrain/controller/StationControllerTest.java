@@ -89,6 +89,13 @@ public class StationControllerTest {
 
         stationRepository.deleteAll();
 
+        UserEntity user = userRepository.findByEmail(email).orElse(null);
+
+        RoleEntity role = roleRepository.findByName("ROLE_ADMIN").orElse(null);
+        
+        user.setRoles(Collections.singletonList(role));          
+        userRepository.save(user);
+
         try {
             stationSeeder.run();
         } catch (Exception e) {            
