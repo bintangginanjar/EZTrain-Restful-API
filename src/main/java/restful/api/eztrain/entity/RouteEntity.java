@@ -16,6 +16,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,7 +27,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "routes")
+@Table(
+    name = "routes",
+    uniqueConstraints = @UniqueConstraint(
+        columnNames = {"origin_station_id", "destination_station_id"}
+    )    
+)
 public class RouteEntity {
 
     @Id
