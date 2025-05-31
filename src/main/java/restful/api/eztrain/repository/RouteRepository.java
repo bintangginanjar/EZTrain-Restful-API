@@ -14,6 +14,6 @@ public interface RouteRepository extends JpaRepository<RouteEntity, Long>, JpaSp
 
     Optional<RouteEntity> findByOriginAndDestination(StationEntity origin, StationEntity destination);
 
-    Page<RouteEntity> findByOriginAndDestination(StationEntity origin, StationEntity destination, Pageable pageable);
+    Page<RouteEntity> findByOriginOrDestination(StationEntity origin, StationEntity destination, Pageable pageable);
 
 }
