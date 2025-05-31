@@ -45,7 +45,7 @@ public class RouteEntity {
     private Double tripDistance;
 
     @Column(nullable = false)
-    private Integer tripDuration;
+    private Double tripDuration;
 
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
