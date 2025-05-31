@@ -41,14 +41,6 @@ public class UserService {
     @Autowired
     private ValidationService validationService;
 
-    public UserService(UserRepository userRepository, RoleRepository roleRepository, 
-                        PasswordEncoder passwordEncoder, ValidationService validationService) {
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.validationService = validationService;
-    }
-
     @Transactional
     public UserResponse register(RegisterUserRequest request) {
         validationService.validate(request);

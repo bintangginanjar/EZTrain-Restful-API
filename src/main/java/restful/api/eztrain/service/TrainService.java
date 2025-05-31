@@ -73,15 +73,7 @@ public class TrainService {
     }
 
     @Transactional(readOnly = true)
-    public TrainResponse get(String strTrainId) {
-        Long trainId;
-
-        try {
-            trainId = Long.parseLong(strTrainId);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
-        }        
-
+    public TrainResponse get(Long trainId) {                
         TrainEntity train = trainRepository.findById(trainId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Train not found"));
 
@@ -103,15 +95,7 @@ public class TrainService {
     }
 
     @Transactional
-    public TrainResponse update(Authentication authentication, UpdateTrainRequest request, String strTrainId) {
-        Long trainId;
-
-        try {
-            trainId = Long.parseLong(strTrainId);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
-        }
-
+    public TrainResponse update(Authentication authentication, UpdateTrainRequest request, Long trainId) {
         UserEntity user = userRepository.findByEmail(authentication.getName())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
@@ -146,15 +130,7 @@ public class TrainService {
     }
 
     @Transactional
-    public void delete(String strTrainId) {
-        Long trainId;
-
-        try {
-            trainId = Long.parseLong(strTrainId);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
-        }
-
+    public void delete(Long trainId) {        
         TrainEntity train = trainRepository.findById(trainId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Train not found"));
 
@@ -204,17 +180,7 @@ public class TrainService {
     }
 
     @Transactional
-    public TrainResponse assignCoach(String strTrainId, String strCoachId) {
-        Long trainId;
-        Long coachId;
-
-        try {
-            trainId = Long.parseLong(strTrainId);
-            coachId = Long.parseLong(strCoachId);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
-        }
-
+    public TrainResponse assignCoach(Long trainId, Long coachId) {        
         TrainEntity train = trainRepository.findById(trainId)
                             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Train not found"));
 
@@ -233,17 +199,7 @@ public class TrainService {
     }
 
     @Transactional
-    public TrainResponse removeCoach(String strTrainId, String strCoachId) {
-        Long trainId;
-        Long coachId;
-
-        try {
-            trainId = Long.parseLong(strTrainId);
-            coachId = Long.parseLong(strCoachId);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
-        }
-                
+    public TrainResponse removeCoach(Long trainId, Long coachId) {                    
         TrainEntity train = trainRepository.findById(trainId)
                             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Train not found"));
 

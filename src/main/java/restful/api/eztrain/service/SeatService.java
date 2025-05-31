@@ -65,15 +65,7 @@ public class SeatService {
     }
 
     @Transactional(readOnly = true)
-    public SeatResponse get(String strSeatId) {
-        Long seatId;
-
-        try {        
-            seatId = Long.parseLong(strSeatId);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
-        }
-
+    public SeatResponse get(Long seatId) {        
         SeatEntity seat = seatRepository.findById(seatId)
                             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Seat not found"));
 
@@ -95,15 +87,7 @@ public class SeatService {
     } 
     
     @Transactional
-    public SeatResponse update(Authentication authentication, UpdateSeatRequest request, String strSeatId) {
-        Long seatId;        
-
-        try {        
-            seatId = Long.parseLong(strSeatId);            
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
-        }
-
+    public SeatResponse update(Authentication authentication, UpdateSeatRequest request, Long seatId) {        
         UserEntity user = userRepository.findByEmail(authentication.getName())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
@@ -126,15 +110,7 @@ public class SeatService {
     }
 
     @Transactional
-    public void delete(String strSeatId) {
-        Long seatId;        
-
-        try {        
-            seatId = Long.parseLong(strSeatId);            
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
-        }
-
+    public void delete(Long seatId) {    
         SeatEntity seat = seatRepository.findById(seatId)
                             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Seat not found"));
 

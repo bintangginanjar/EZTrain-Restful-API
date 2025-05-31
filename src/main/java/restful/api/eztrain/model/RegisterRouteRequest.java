@@ -1,6 +1,5 @@
 package restful.api.eztrain.model;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,11 +12,11 @@ import lombok.NoArgsConstructor;
 @Builder
 public class RegisterRouteRequest {
     
-    @NotBlank
-    private String strOriginId;
+    @NotNull
+    private Long originId;
 
-    @NotBlank
-    private String strDestId;
+    @NotNull
+    private Long destId;
     
     @NotNull
     private Double tripDistance;

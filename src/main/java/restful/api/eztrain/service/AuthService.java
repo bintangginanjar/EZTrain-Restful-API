@@ -56,17 +56,6 @@ public class AuthService {
     @Autowired
     ValidationService validationService;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder,
-            AuthenticationManager authenticationManager, CustomUserDetailService userDetailService, JwtUtil jwtUtil,
-            ValidationService validationService) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.authenticationManager = authenticationManager;
-        this.userDetailService = userDetailService;
-        this.jwtUtil = jwtUtil;
-        this.validationService = validationService;
-    }
-
     @Transactional
     public TokenResponse login(LoginUserRequest request) {
         try {

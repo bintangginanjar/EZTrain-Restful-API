@@ -83,8 +83,8 @@ public class RouteControllerTest {
         StationEntity destination = stationRepository.findByCode("GMR").orElse(null);
 
         RegisterRouteRequest request = new RegisterRouteRequest();        
-        request.setStrOriginId(Long.toString(origin.getId()));
-        request.setStrDestId(Long.toString(destination.getId()));
+        request.setOriginId(origin.getId());
+        request.setDestId(destination.getId());
         request.setTripDistance(180.0);
         request.setTripDuration(3);        
 
@@ -114,9 +114,9 @@ public class RouteControllerTest {
             });
 
             assertEquals(true, response.getStatus());
-            assertEquals(request.getStrOriginId(), Long.toString(response.getData().getOriginId()));            
+            assertEquals(request.getOriginId(), response.getData().getOriginId());            
             assertEquals(origin.getName(), response.getData().getOrigin());
-            assertEquals(request.getStrDestId(), Long.toString(response.getData().getDestId()));
+            assertEquals(request.getDestId(), response.getData().getDestId());
             assertEquals(destination.getName(), response.getData().getDestination());
             assertEquals(request.getTripDistance(), response.getData().getTripDistance());
             assertEquals(request.getTripDuration(), response.getData().getTripDuration());

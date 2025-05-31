@@ -50,20 +50,10 @@ public class RouteService {
         UserEntity user = userRepository.findByEmail(authentication.getName())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        Long originId;
-        Long destId;
-
-        try {
-            originId = Long.parseLong(request.getStrOriginId());
-            destId = Long.parseLong(request.getStrDestId());
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
-        }
-
-        StationEntity origin = stationRepository.findById(originId)
+        StationEntity origin = stationRepository.findById(request.getOriginId())
                                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Origin station not found"));
 
-        StationEntity destination = stationRepository.findById(destId)
+        StationEntity destination = stationRepository.findById(request.getDestId())
                                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Destination station not found"));
 
         if (routeRepository.findByOriginAndDestination(origin, destination).isPresent()) {
@@ -87,17 +77,7 @@ public class RouteService {
     }
 
     @Transactional(readOnly = true)
-    public RouteResponse get(String strOriginId, String strDestId) {
-        Long originId;
-        Long destId;
-
-        try {
-            originId = Long.parseLong(strOriginId);
-            destId = Long.parseLong(strDestId);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
-        }
-
+    public RouteResponse get(Long originId, Long destId) {
         StationEntity origin = stationRepository.findById(originId)
                                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Origin station not found"));
 
@@ -125,36 +105,24 @@ public class RouteService {
     }
 
     @Transactional
-    public RouteResponse update(Authentication authentication, UpdateRouteRequest request, String strRouteId) {
-        Long routeId;
-        Long originId;
-        Long destId;
-
-        try {
-            routeId = Long.parseLong(strRouteId);
-            originId = Long.parseLong(request.getStrOriginId());
-            destId = Long.parseLong(request.getStrOriginId());
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
-        }
-
+    public RouteResponse update(Authentication authentication, UpdateRouteRequest request, Long routeId) {        
         UserEntity user = userRepository.findByEmail(authentication.getName())
                             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        StationEntity origin = stationRepository.findById(originId)
+        StationEntity origin = stationRepository.findById(request.getOriginId())
                                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Origin station not found"));
 
-        StationEntity destination = stationRepository.findById(destId)
+        StationEntity destination = stationRepository.findById(request.getDestId())
                                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Destination station not found"));
 
         RouteEntity route = routeRepository.findById(routeId)
                                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Route not found"));
 
-        if (Objects.nonNull(request.getStrOriginId())) {
+        if (Objects.nonNull(request.getOriginId())) {
             route.setOrigin(origin);
         }
         
-        if (Objects.nonNull(request.getStrDestId())) {
+        if (Objects.nonNull(request.getDestId())) {
             route.setDestination(destination);
         }
 
@@ -178,15 +146,7 @@ public class RouteService {
     }
 
     @Transactional
-    public void delete(String strRouteId) {
-        Long routeId;        
-
-        try {
-            routeId = Long.parseLong(strRouteId);            
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
-        }
-
+    public void delete(Long routeId) {
         RouteEntity route = routeRepository.findById(routeId)
                                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Route not found"));
 

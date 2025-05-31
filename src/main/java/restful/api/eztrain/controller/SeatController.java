@@ -52,7 +52,7 @@ public class SeatController {
         produces = MediaType.APPLICATION_JSON_VALUE
     )    
     public WebResponse<SeatResponse> get(Authentication authentication, 
-                                        @PathVariable("seatId") String seatId) { 
+                                        @PathVariable("seatId") Long seatId) { 
 
         SeatResponse response = seatService.get(seatId);
 
@@ -71,7 +71,7 @@ public class SeatController {
     )
     public WebResponse<SeatResponse> update(Authentication authentication, 
                                             @RequestBody UpdateSeatRequest request,
-                                            @PathVariable("seatId") String seatId) {
+                                            @PathVariable("seatId") Long seatId) {
 
         request.setId(seatId);
         
@@ -90,7 +90,7 @@ public class SeatController {
         produces = MediaType.APPLICATION_JSON_VALUE
     )
     public WebResponse<String> delete(Authentication authentication,
-                                            @PathVariable("seatId") String seatId) {
+                                            @PathVariable("seatId") Long seatId) {
 
         seatService.delete(seatId);
 

@@ -56,7 +56,7 @@ public class TrainController {
         produces = MediaType.APPLICATION_JSON_VALUE
     )    
     public WebResponse<TrainResponse> get(Authentication authentication, 
-                                        @PathVariable("trainId") String trainId) { 
+                                        @PathVariable("trainId") Long trainId) { 
 
         TrainResponse response = trainService.get(trainId);
 
@@ -75,7 +75,7 @@ public class TrainController {
     )
     public WebResponse<TrainResponse> update(Authentication authentication, 
                                             @RequestBody UpdateTrainRequest request,
-                                            @PathVariable("trainId") String trainId) {
+                                            @PathVariable("trainId") Long trainId) {
 
         request.setId(trainId);
         
@@ -94,7 +94,7 @@ public class TrainController {
         produces = MediaType.APPLICATION_JSON_VALUE
     )
     public WebResponse<String> delete(Authentication authentication,
-                                            @PathVariable("trainId") String trainId) {
+                                            @PathVariable("trainId") Long trainId) {
 
         trainService.delete(trainId);
 
@@ -168,8 +168,8 @@ public class TrainController {
         produces = MediaType.APPLICATION_JSON_VALUE
     )
     public WebResponse<TrainResponse> assignCoach(Authentication authentication, 
-                                            @PathVariable("trainId") String trainId,
-                                            @PathVariable("coachId") String coachId) {        
+                                            @PathVariable("trainId") Long trainId,
+                                            @PathVariable("coachId") Long coachId) {        
         
         TrainResponse response = trainService.assignCoach(trainId, coachId);
 
@@ -187,8 +187,8 @@ public class TrainController {
         produces = MediaType.APPLICATION_JSON_VALUE
     )
     public WebResponse<TrainResponse> removeCoach(Authentication authentication, 
-                                            @PathVariable("trainId") String trainId,
-                                            @PathVariable("coachId") String coachId) {        
+                                            @PathVariable("trainId") Long trainId,
+                                            @PathVariable("coachId") Long coachId) {        
         
         TrainResponse response = trainService.removeCoach(trainId, coachId);
 

@@ -2,7 +2,7 @@ package restful.api.eztrain.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,12 +15,12 @@ import lombok.NoArgsConstructor;
 public class UpdateRouteRequest {
 
     @JsonIgnore
-    @NotBlank
-    private String id;
+    @NotNull
+    private Long id;
 
-    private String strOriginId;
+    private Long originId;
 
-    private String strDestId;
+    private Long destId;
     
     private Double tripDistance;
     

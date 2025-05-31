@@ -52,8 +52,8 @@ public class RouteController {
         produces = MediaType.APPLICATION_JSON_VALUE
     )    
     public WebResponse<RouteResponse> get(Authentication authentication, 
-                                        @PathVariable("originId") String originId,
-                                        @PathVariable("destId") String destId) { 
+                                        @PathVariable("originId") Long originId,
+                                        @PathVariable("destId") Long destId) { 
 
         RouteResponse response = routeService.get(originId, destId);
 
@@ -95,7 +95,7 @@ public class RouteController {
     )
     public WebResponse<RouteResponse> update(Authentication authentication, 
                                             @RequestBody UpdateRouteRequest request,
-                                            @PathVariable("routeId") String routeId) {
+                                            @PathVariable("routeId") Long routeId) {
 
         request.setId(routeId);
         
@@ -114,7 +114,7 @@ public class RouteController {
         produces = MediaType.APPLICATION_JSON_VALUE
     )
     public WebResponse<String> delete(Authentication authentication,
-                                            @PathVariable("routeId") String routeId) {
+                                            @PathVariable("routeId") Long routeId) {
 
         routeService.delete(routeId);
 
