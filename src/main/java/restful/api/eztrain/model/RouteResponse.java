@@ -23,6 +23,6 @@ public class RouteResponse {
     
     private Double tripDistance;
     
-    private Integer tripDuration;
+    private Double tripDuration;
 
 }

@@ -22,6 +22,6 @@ public class RegisterRouteRequest {
     private Double tripDistance;
 
     @NotNull
-    private Integer tripDuration;
+    private Double tripDuration;
 
 }
