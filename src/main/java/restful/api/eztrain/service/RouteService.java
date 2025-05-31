@@ -132,7 +132,7 @@ public class RouteService {
 
         if (Objects.nonNull(request.getTripDuration())) {
             route.setTripDuration(request.getTripDuration());
-        }
+        }        
 
         route.setUserEntity(user);
 
@@ -167,7 +167,7 @@ public class RouteService {
             return Page.empty(pageable);
         }
                 
-        Page<RouteEntity> routes = routeRepository.findByOriginAndDestination(origin.get(), destination.get(), pageable);
+        Page<RouteEntity> routes = routeRepository.findByOriginOrDestination(origin.get(), destination.get(), pageable);
         List<RouteResponse> stationResponses = routes
                                                     .getContent()
                                                     .stream()
