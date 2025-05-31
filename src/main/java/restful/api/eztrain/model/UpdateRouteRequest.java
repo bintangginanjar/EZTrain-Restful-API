@@ -24,6 +24,6 @@ public class UpdateRouteRequest {
     
     private Double tripDistance;
     
-    private Integer tripDuration;
+    private Double tripDuration;
 
 }
