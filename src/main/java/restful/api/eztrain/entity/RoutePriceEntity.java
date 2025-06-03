@@ -55,4 +55,8 @@ public class RoutePriceEntity {
     @OneToMany(mappedBy = "routePriceEntity", cascade = CascadeType.ALL)
     private List<TicketEntity> tickets;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false, referencedColumnName = "id")
+    private UserEntity userEntity;
+
 }
