@@ -107,22 +107,22 @@ public class RouteService {
     @Transactional
     public RouteResponse update(Authentication authentication, UpdateRouteRequest request, Long routeId) {        
         UserEntity user = userRepository.findByEmail(authentication.getName())
-                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-
-        StationEntity origin = stationRepository.findById(request.getOriginId())
-                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Origin station not found"));
-
-        StationEntity destination = stationRepository.findById(request.getDestId())
-                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Destination station not found"));
+                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));                
 
         RouteEntity route = routeRepository.findById(routeId)
                                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Route not found"));
 
         if (Objects.nonNull(request.getOriginId())) {
+            StationEntity origin = stationRepository.findById(request.getOriginId())
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Origin station not found"));
+
             route.setOrigin(origin);
         }
         
         if (Objects.nonNull(request.getDestId())) {
+            StationEntity destination = stationRepository.findById(request.getDestId())
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Destination station not found"));
+
             route.setDestination(destination);
         }
 
@@ -168,13 +168,13 @@ public class RouteService {
         }
                 
         Page<RouteEntity> routes = routeRepository.findByOriginOrDestination(origin.get(), destination.get(), pageable);
-        List<RouteResponse> stationResponses = routes
+        List<RouteResponse> responses = routes
                                                     .getContent()
                                                     .stream()
                                                     .map(route -> ResponseMapper.ToRouteResponseMapper(route))
                                                     .collect(Collectors.toList());
 
-        return new PageImpl<>(stationResponses, pageable, routes.getTotalElements());
+        return new PageImpl<>(responses, pageable, routes.getTotalElements());
 
     }
 
