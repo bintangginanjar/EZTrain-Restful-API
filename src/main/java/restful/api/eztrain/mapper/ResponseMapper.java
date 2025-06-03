@@ -5,12 +5,14 @@ import java.util.stream.Collectors;
 
 import restful.api.eztrain.entity.CoachEntity;
 import restful.api.eztrain.entity.RouteEntity;
+import restful.api.eztrain.entity.RoutePriceEntity;
 import restful.api.eztrain.entity.SeatEntity;
 import restful.api.eztrain.entity.StationEntity;
 import restful.api.eztrain.entity.TrainEntity;
 import restful.api.eztrain.entity.UserEntity;
 import restful.api.eztrain.model.CoachResponse;
 import restful.api.eztrain.model.ForgotPasswordResponse;
+import restful.api.eztrain.model.RoutePriceResponse;
 import restful.api.eztrain.model.RouteResponse;
 import restful.api.eztrain.model.SeatResponse;
 import restful.api.eztrain.model.StationResponse;
@@ -117,4 +119,16 @@ public class ResponseMapper {
                 .tripDuration(route.getTripDuration())
                 .build();
     }
+
+    public static RoutePriceResponse ToRoutePriceResponseMapper(RoutePriceEntity routePrice) {
+        return RoutePriceResponse.builder()
+                .id(routePrice.getId())
+                .price(routePrice.getPrice())
+                .coachTypeId(routePrice.getCoachTypeEntity().getId())
+                .coachType(routePrice.getCoachTypeEntity().getName())
+                .routeId(routePrice.getRouteEntity().getId())
+                .origin(routePrice.getRouteEntity().getOrigin().getName())
+                .destination(routePrice.getRouteEntity().getOrigin().getName())                
+                .build();
+        }
 }
