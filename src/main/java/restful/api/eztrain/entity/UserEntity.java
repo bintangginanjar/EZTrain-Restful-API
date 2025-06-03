@@ -88,6 +88,9 @@ public class UserEntity {
     @OneToMany(mappedBy = "userEntity", cascade = CascadeType.ALL)
     private List<ScheduleEntity> schedules;
 
+    @OneToMany(mappedBy = "userEntity", cascade = CascadeType.ALL)
+    private List<RoutePriceEntity> routePrices;
+
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinTable(
         name = "users_roles",
