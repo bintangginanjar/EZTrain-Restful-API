@@ -128,7 +128,7 @@ public class ResponseMapper {
                 .coachType(routePrice.getCoachTypeEntity().getName())
                 .routeId(routePrice.getRouteEntity().getId())
                 .origin(routePrice.getRouteEntity().getOrigin().getName())
-                .destination(routePrice.getRouteEntity().getOrigin().getName())                
+                .destination(routePrice.getRouteEntity().getDestination().getName())                
                 .build();
         }
 }
