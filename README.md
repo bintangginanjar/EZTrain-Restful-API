@@ -27,12 +27,128 @@ Instructions for setting up and running the project locally will be added here.
 > Base URL: `/api`
 
 ### 🔐 Auth
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/auth/register` | Register new account |
-| POST | `/auth/login` | Login & receive JWT |
-| POST | `/auth/forgot-password` | Request password reset token |
-| POST | `/auth/reset-password` | Reset password using token |
+
+| Method | Endpoint | Description | Allowed User |
+| ------ | -------- | ----------- | ------------ |
+| POST   | `/auth/register` | Register new account | ALL |
+| POST   | `/auth/login`    | Login & receive JWT | ALL |
+| POST   | `/auth/forgot-password` | Request password reset token | ALL |
+| POST   | `/auth/reset-password` | Reset password using token | ALL |
+
+#### Register New Account
+
+Endpoint : `POST /api/auth/register`
+
+Request Body:
+
+```json
+{
+    "email": "user@example.com",
+    "password": "password123",
+    "role": "USER"
+}
+```
+
+Response Body:
+
+```json
+{
+    "status": true,
+    "messages": "User registration successful",
+    "errors": null,
+    "data": {
+        "id": "generated-uuid",
+        "email": "user@example.com",
+        "role": "USER"
+    },
+    "paging": null
+}
+```
+
+#### Login & Receive JWT
+
+Endpoint : `POST /api/auth/login`
+
+Request Body:
+
+```json
+{
+    "email": "user@example.com",
+    "password": "password123"
+}
+```
+
+Response Body:
+
+```json
+{
+    "status": true,
+    "messages": "Login successful",
+    "errors": null,
+    "data": {
+        "email": "user@example.com",
+        "token": "your-jwt-token",
+        "tokenType": "Bearer ",
+        "roles": [
+            "USER"
+        ]
+    },
+    "paging": null
+}
+```
+
+#### Request Password Reset Token
+
+Endpoint : `POST /api/auth/forgot-password`
+
+Request Body:
+
+```json
+{
+    "email": "user@example.com"
+}
+```
+
+Response Body:
+
+```json
+{
+    "status": true,
+    "messages": "Password reset token sent to email",
+    "errors": null,
+    "data": {
+        "email": "user@example.com",
+        "token": "generated-reset-token"
+    },
+    "paging": null
+}
+```
+
+#### Reset Password Using Token
+
+Endpoint : `POST /api/auth/reset-password`
+
+Request Body:
+
+```json
+{
+    "email": "user@example.com",
+    "token": "generated-reset-token",
+    "password": "new_password123"
+}
+```
+
+Response Body:
+
+```json
+{
+    "status": true,
+    "messages": "Password reset successful",
+    "errors": null,
+    "data": null,
+    "paging": null
+}
+```
 
 ### 👤 Users
 | Method | Endpoint | Description |
