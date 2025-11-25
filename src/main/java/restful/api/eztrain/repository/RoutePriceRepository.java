@@ -3,6 +3,7 @@ package restful.api.eztrain.repository;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
@@ -17,6 +18,8 @@ public interface RoutePriceRepository extends JpaRepository<RoutePriceEntity, Lo
     
     Optional<RoutePriceEntity> findByRouteEntity(RouteEntity routeEntity);
 
-    Page<RoutePriceEntity> findByRouteEntityOrCoachTypeEntity(RouteEntity routeEntity, CoachTypeEntity coachTypeEntity);
+    Optional<RoutePriceEntity> findByRouteEntityAndCoachTypeEntity(RouteEntity routeEntity, CoachTypeEntity coachTypeEntity);
+
+    Page<RoutePriceEntity> findByRouteEntityOrCoachTypeEntity(RouteEntity routeEntity, CoachTypeEntity coachTypeEntity, Pageable pageable);
 
 }
