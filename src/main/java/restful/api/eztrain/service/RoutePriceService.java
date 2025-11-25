@@ -66,6 +66,10 @@ public class RoutePriceService {
         CoachTypeEntity coachType = coachTypeRepository.findById(request.getCoachTypeId())
                                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Coach type not found"));
 
+        if (routePriceRepository.findByRouteEntityAndCoachTypeEntity(route, coachType).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Route price already registered");
+        }
+
         RoutePriceEntity routePrice = new RoutePriceEntity();
         routePrice.setPrice(request.getPrice());
         routePrice.setCoachTypeEntity(coachType);
@@ -160,7 +164,7 @@ public class RoutePriceService {
         Optional<RouteEntity> route = routeRepository.findByOriginAndDestination(origin.get(), destination.get());   
         Optional<CoachTypeEntity> coachType = coachTypeRepository.findByName(request.getCoachType());       
     
-        Page<RoutePriceEntity> routePrices = routePriceRepository.findByRouteEntityOrCoachTypeEntity(route.get(), coachType.get());
+        Page<RoutePriceEntity> routePrices = routePriceRepository.findByRouteEntityOrCoachTypeEntity(route.get(), coachType.get(), pageable);
         List<RoutePriceResponse> responses = routePrices
                                                     .getContent()
                                                     .stream()
